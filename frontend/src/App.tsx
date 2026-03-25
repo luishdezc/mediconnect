@@ -8,24 +8,9 @@ import { useAuthStore } from './store/authStore';
 import LoginPage            from './pages/auth/LoginPage';
 import RegisterPage         from './pages/auth/RegisterPage';
 import PatientDashboard     from './pages/patient/PatientDashboard';
-import DoctorSearch         from './pages/patient/DoctorSearch';
-import AppointmentsPage     from './pages/patient/AppointmentsPage';
-import MedicalRecordsPage   from './pages/patient/MedicalRecordsPage';
 import DoctorDashboard      from './pages/doctor/DoctorDashboard';
-import DoctorAppointments   from './pages/doctor/DoctorAppointments';
-import DoctorPatientsPage   from './pages/doctor/DoctorPatients';
-import SubscriptionPage     from './pages/doctor/SubscriptionPage';
-import ChatPage             from './pages/shared/ChatPage';
-import AdminDashboard       from './pages/admin/AdminDashboard';
 import SetupAdminPage       from './pages/auth/SetupAdminPage';
-import AvailabilityPage      from './pages/doctor/AvailabilityPage';
-import DoctorProfile         from './pages/patient/DoctorProfile';
-import MedicationsPage       from './pages/patient/MedicationsPage';
-import PatientProfilePage    from './pages/patient/PatientProfile';
-import DoctorCalendarPage    from './pages/doctor/DoctorCalendar';
 import LandingPage           from './pages/auth/LandingPage';
-import VideoPage             from './pages/shared/VideoPage';
-import SettingsPage          from './pages/shared/SettingsPage';
 import './styles/main.scss';
 
 function RequireAuth({ children, roles }: { children: React.ReactElement; roles?: string[] }) {
@@ -97,40 +82,9 @@ function AppContent() {
 
         {/* Patient */}
         <Route path="/patient/dashboard"    element={<RequireAuth roles={['patient']}><PatientDashboard /></RequireAuth>} />
-        <Route path="/patient/doctors"      element={<RequireAuth roles={['patient']}><DoctorSearch /></RequireAuth>} />
-        <Route path="/patient/appointments" element={<RequireAuth roles={['patient']}><AppointmentsPage /></RequireAuth>} />
-        <Route path="/patient/records"      element={<RequireAuth roles={['patient']}><MedicalRecordsPage /></RequireAuth>} />
-        <Route path="/patient/doctors/:id"  element={<RequireAuth roles={['patient']}><DoctorProfile /></RequireAuth>} />
-        <Route path="/patient/chat"         element={<RequireAuth roles={['patient']}><ChatPage /></RequireAuth>} />
 
         {/* Doctor */}
         <Route path="/doctor/dashboard"     element={<RequireAuth roles={['doctor']}><DoctorDashboard /></RequireAuth>} />
-        <Route path="/doctor/appointments"  element={<RequireAuth roles={['doctor']}><DoctorAppointments /></RequireAuth>} />
-        <Route path="/doctor/patients"      element={<RequireAuth roles={['doctor']}><DoctorPatientsPage /></RequireAuth>} />
-        <Route path="/doctor/chat"          element={<RequireAuth roles={['doctor']}><ChatPage /></RequireAuth>} />
-        <Route path="/doctor/subscription"  element={<RequireAuth roles={['doctor']}><SubscriptionPage /></RequireAuth>} />
-
-        {/* Admin */}
-        <Route path="/admin/dashboard"         element={<RequireAuth roles={['admin']}><AdminDashboard /></RequireAuth>} />
-        <Route path="/admin/users"             element={<RequireAuth roles={['admin']}><AdminDashboard /></RequireAuth>} />
-        <Route path="/admin/doctors/pending"   element={<RequireAuth roles={['admin']}><AdminDashboard /></RequireAuth>} />
-
-        {/* Doctor availability */}
-        <Route path="/doctor/availability" element={<RequireAuth roles={['doctor']}><AvailabilityPage /></RequireAuth>} />
-
-        {/* Video calls - both roles */}
-        <Route path="/doctor/video"  element={<RequireAuth roles={['doctor']}><VideoPage /></RequireAuth>} />
-        <Route path="/patient/video" element={<RequireAuth roles={['patient']}><VideoPage /></RequireAuth>} />
-
-        {/* Settings - all authenticated users */}
-        <Route path="/settings" element={<RequireAuth><SettingsPage /></RequireAuth>} />
-
-        {/* Patient profile */}
-        <Route path="/patient/profile"      element={<RequireAuth roles={['patient']}><PatientProfilePage /></RequireAuth>} />
-        <Route path="/patient/medications"  element={<RequireAuth roles={['patient']}><MedicationsPage /></RequireAuth>} />
-
-        {/* Doctor calendar */}
-        <Route path="/doctor/calendar" element={<RequireAuth roles={['doctor']}><DoctorCalendarPage /></RequireAuth>} />
 
         {/* Admin setup - first time only */}
         <Route path="/setup-admin" element={<SetupAdminPage />} />
