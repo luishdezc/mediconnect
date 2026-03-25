@@ -1,0 +1,51 @@
+@use '../../styles/variables' as *;
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: sp(2);
+  font-family: $font-body; font-weight: 600; letter-spacing: 0.01em;
+  border: 2px solid transparent; border-radius: $radius-md;
+  cursor: pointer; transition: all $transition-fast;
+  white-space: nowrap; user-select: none;
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+  &:focus-visible { outline: 2px solid $primary-500; outline-offset: 3px; }
+
+  // Variants
+  &--primary {
+    background: $primary-700; color: $white;
+    &:not(:disabled):hover { background: $primary-800; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(26,107,92,0.3); }
+    &:not(:disabled):active { transform: translateY(0); }
+  }
+  &--secondary {
+    background: $primary-50; color: $primary-700; border-color: $primary-200;
+    &:not(:disabled):hover { background: $primary-100; }
+  }
+  &--outline {
+    background: transparent; color: $primary-700; border-color: $primary-700;
+    &:not(:disabled):hover { background: $primary-50; }
+  }
+  &--ghost {
+    background: transparent; color: $gray-700;
+    &:not(:disabled):hover { background: $gray-200; color: $gray-900; }
+  }
+  &--danger {
+    background: $error-500; color: $white;
+    &:not(:disabled):hover { background: #c53030; }
+  }
+
+  // Sizes
+  &--sm  { height: 32px; padding: 0 sp(3); font-size: 13px; }
+  &--md  { height: 40px; padding: 0 sp(4); font-size: 14px; }
+  &--lg  { height: 48px; padding: 0 sp(6); font-size: 15px; }
+  &--full { width: 100%; }
+}
+
+.icon { display: flex; align-items: center; flex-shrink: 0; svg { width: 16px; height: 16px; } }
+
+.spinner {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

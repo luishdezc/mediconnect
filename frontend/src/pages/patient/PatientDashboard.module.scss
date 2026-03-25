@@ -1,0 +1,92 @@
+@use '../../styles/variables' as *;
+
+.page { display: flex; flex-direction: column; gap: sp(6); animation: fadeInUp 0.4s ease; }
+
+.skeleton { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: sp(4); }
+
+.header {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: sp(4); flex-wrap: wrap;
+  h1 { font-family: $font-display; font-size: 28px; color: $gray-900; margin-bottom: sp(1); }
+  p { color: $gray-600; font-size: 14px; text-transform: capitalize; }
+}
+
+.todayAlert {
+  display: flex; align-items: center; gap: sp(3); padding: sp(3) sp(5);
+  background: #ebf8ff; border: 1px solid #90cdf4; border-radius: $radius-md; color: #2b6cb0;
+  font-size: 14px;
+  svg { flex-shrink: 0; }
+  a { font-weight: 600; margin-left: auto; color: #2b6cb0; &:hover { text-decoration: underline; } }
+}
+
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: sp(4);
+  @media (max-width: $bp-lg) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: $bp-sm) { grid-template-columns: 1fr; }
+}
+
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: sp(6);
+  @media (max-width: $bp-lg) { grid-template-columns: 1fr; }
+}
+
+.sectionHeader {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: sp(5);
+  h3 { font-family: $font-display; font-size: 16px; color: $gray-900; }
+}
+.seeAll {
+  display: flex; align-items: center; gap: sp(1); font-size: 13px; color: $primary-700;
+  font-weight: 600; &:hover { text-decoration: underline; }
+}
+
+.empty {
+  display: flex; flex-direction: column; align-items: center; gap: sp(3);
+  padding: sp(8) 0; color: $gray-400; text-align: center;
+  svg { opacity: 0.4; }
+  p { font-size: 14px; color: $gray-500; }
+}
+
+.apptList { display: flex; flex-direction: column; gap: sp(3); }
+.apptItem {
+  display: flex; align-items: center; gap: sp(3); padding: sp(3);
+  border: 1px solid $gray-200; border-radius: $radius-md;
+  transition: border-color $transition-fast;
+  &:hover { border-color: $primary-300; }
+}
+.apptAvatar {
+  width: 40px; height: 40px; border-radius: $radius-full; flex-shrink: 0;
+  background: $primary-100; overflow: hidden; display: flex; align-items: center; justify-content: center;
+  img { width: 100%; height: 100%; object-fit: cover; }
+  span { font-weight: 700; color: $primary-700; font-size: 15px; }
+}
+.apptInfo { flex: 1; min-width: 0; }
+.apptDoctor { display: block; font-size: 14px; font-weight: 600; color: $gray-900; @include truncate; }
+.apptSpec   { display: block; font-size: 12px; color: $primary-600; }
+.apptDate   { display: block; font-size: 12px; color: $gray-500; margin-top: sp(1); }
+
+.recordList { display: flex; flex-direction: column; gap: sp(3); }
+.recordItem {
+  display: flex; align-items: center; gap: sp(3); padding: sp(3);
+  border: 1px solid $gray-200; border-radius: $radius-md;
+}
+.recordIcon {
+  width: 36px; height: 36px; border-radius: $radius-md; background: $accent-100; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; color: $warning-500;
+}
+.recordInfo { flex: 1; min-width: 0; }
+.recordDiag { display: block; font-size: 14px; font-weight: 600; color: $gray-900; @include truncate; }
+.recordDoc  { display: block; font-size: 12px; color: $gray-600; }
+.recordDate { display: block; font-size: 12px; color: $gray-500; }
+.attachBadge { font-size: 12px; color: $gray-500; flex-shrink: 0; }
+
+.quickTitle { font-family: $font-display; font-size: 16px; color: $gray-900; margin-bottom: sp(4); }
+.quickActions { display: grid; grid-template-columns: repeat(4, 1fr); gap: sp(4);
+  @media (max-width: $bp-lg)  { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: $bp-sm)  { grid-template-columns: 1fr 1fr; }
+}
+.quickCard {
+  display: flex; flex-direction: column; align-items: center; gap: sp(2);
+  padding: sp(5); border: 1.5px solid $gray-200; border-radius: $radius-lg; text-align: center;
+  text-decoration: none; transition: all $transition-base;
+  &:hover { border-color: $primary-400; background: $primary-50; transform: translateY(-2px); box-shadow: $shadow-sm; }
+}
+.quickIcon  { font-size: 28px; }
+.quickLabel { font-size: 14px; font-weight: 700; color: $gray-900; }
+.quickDesc  { font-size: 12px; color: $gray-500; }

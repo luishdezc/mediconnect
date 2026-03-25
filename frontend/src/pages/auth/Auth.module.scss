@@ -1,0 +1,115 @@
+@use '../../styles/variables' as *;
+
+.page {
+  min-height: 100vh; display: flex;
+  @media (max-width: #{$bp-lg - 1px}) { flex-direction: column; }
+}
+
+.left {
+  width: 45%; background: linear-gradient(155deg, $primary-900 0%, $primary-700 60%, $primary-500 100%);
+  padding: sp(10) sp(12); display: flex; flex-direction: column; justify-content: center;
+  position: relative; overflow: hidden;
+  @media (max-width: #{$bp-lg - 1px}) { width: 100%; padding: sp(8) sp(6); min-height: 260px; }
+  @media (max-width: #{$bp-md - 1px}) { min-height: auto; padding: sp(6) sp(4); }
+
+  &::before {
+    content: ''; position: absolute; top: -80px; right: -80px;
+    width: 360px; height: 360px; border-radius: 50%;
+    background: rgba(255,255,255,0.04); pointer-events: none;
+  }
+  &::after {
+    content: ''; position: absolute; bottom: -100px; left: -60px;
+    width: 280px; height: 280px; border-radius: 50%;
+    background: rgba(255,255,255,0.03); pointer-events: none;
+  }
+}
+
+.brand {
+  display: flex; align-items: center; gap: sp(2); margin-bottom: sp(12);
+  @media (max-width: #{$bp-md - 1px}) { margin-bottom: sp(4); }
+}
+.brandIcon { font-size: 28px; }
+.brandName { font-family: $font-display; font-size: 22px; color: $white; font-weight: 600; }
+
+.hero {
+  margin-bottom: sp(8);
+  @media (max-width: #{$bp-md - 1px}) { display: none; }
+  h1 {
+    font-family: $font-display; font-size: clamp(28px, 4vw, 48px); font-weight: 700;
+    color: $white; line-height: 1.15; margin-bottom: sp(4);
+  }
+  p { font-size: 16px; color: rgba(255,255,255,0.75); line-height: 1.7; max-width: 380px; }
+}
+
+.features {
+  display: flex; flex-direction: column; gap: sp(2);
+  @media (max-width: #{$bp-md - 1px}) { flex-direction: row; flex-wrap: wrap; }
+}
+.feature {
+  font-size: 14px; color: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.08); border-radius: $radius-md;
+  padding: sp(2) sp(3); backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.right {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: sp(8) sp(6); background: $gray-100;
+  @media (max-width: #{$bp-md - 1px}) { padding: sp(6) sp(4); }
+}
+
+.formCard {
+  width: 100%; max-width: 460px; background: $white;
+  border-radius: $radius-xl; box-shadow: $shadow-lg;
+  padding: sp(8); animation: fadeInUp 0.4s ease;
+}
+
+.formHeader {
+  margin-bottom: sp(6);
+  h2 { font-family: $font-display; font-size: 26px; color: $gray-900; margin-bottom: sp(1); }
+  p { font-size: 14px; color: $gray-600;
+    a { color: $primary-700; font-weight: 600; &:hover { text-decoration: underline; } }
+  }
+}
+
+.googleBtn {
+  display: flex; align-items: center; justify-content: center; gap: sp(3);
+  width: 100%; height: 44px; border: 1.5px solid $gray-300; border-radius: $radius-md;
+  background: $white; color: $gray-800; font-size: 14px; font-weight: 600;
+  text-decoration: none; cursor: pointer; transition: all $transition-fast;
+  &:hover { border-color: $gray-400; background: $gray-50; box-shadow: $shadow-sm; }
+}
+
+.divider {
+  display: flex; align-items: center; gap: sp(3); margin: sp(5) 0;
+  &::before, &::after { content: ''; flex: 1; height: 1px; background: $gray-200; }
+  span { font-size: 12px; color: $gray-500; white-space: nowrap; }
+}
+
+.form { display: flex; flex-direction: column; gap: sp(4); }
+
+.twoCol { display: grid; grid-template-columns: 1fr 1fr; gap: sp(4);
+  @media (max-width: 420px) { grid-template-columns: 1fr; }
+}
+
+.roleSelector {
+  display: grid; grid-template-columns: 1fr 1fr; gap: sp(3);
+  label { font-size: 13px; font-weight: 600; color: $gray-700; margin-bottom: sp(1); display: block; }
+}
+.roleCard {
+  display: flex; flex-direction: column; align-items: center; gap: sp(2);
+  padding: sp(4); border: 2px solid $gray-300; border-radius: $radius-lg;
+  cursor: pointer; transition: all $transition-fast; background: $white;
+  span:first-child { font-size: 28px; }
+  span:last-child { font-size: 13px; font-weight: 600; color: $gray-700; }
+  &--active { border-color: $primary-600; background: $primary-50;
+    span:last-child { color: $primary-700; }
+  }
+  &:hover:not(&--active) { border-color: $gray-400; }
+}
+
+.doctorExtra { display: flex; flex-direction: column; gap: sp(4);
+  padding: sp(4); background: $primary-50; border-radius: $radius-md; border: 1px solid $primary-100;
+}
+
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
