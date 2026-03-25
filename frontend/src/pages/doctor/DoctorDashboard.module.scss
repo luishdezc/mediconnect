@@ -1,0 +1,64 @@
+@use '../../styles/variables' as *;
+
+.page { display: flex; flex-direction: column; gap: sp(6); animation: fadeInUp 0.4s ease; }
+.header { display: flex; align-items: flex-start; justify-content: space-between; gap: sp(4); flex-wrap: wrap;
+  h1 { font-family: $font-display; font-size: 28px; color: $gray-900; margin-bottom: sp(1); }
+  p { color: $gray-600; font-size: 14px; text-transform: capitalize; }
+}
+.warningAlert {
+  display: flex; align-items: flex-start; gap: sp(3); padding: sp(4) sp(5);
+  background: $warning-100; border: 1px solid $accent-300; border-radius: $radius-md; color: $warning-500;
+  svg { flex-shrink: 0; margin-top: 2px; }
+  strong { display: block; font-size: 14px; font-weight: 700; color: $gray-800; margin-bottom: sp(1); }
+  p { font-size: 13px; color: $gray-600; }
+}
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: sp(4);
+  @media (max-width: $bp-lg) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: $bp-sm) { grid-template-columns: 1fr; }
+}
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: sp(6);
+  @media (max-width: $bp-lg) { grid-template-columns: 1fr; }
+}
+.sectionHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: sp(5);
+  h3 { font-family: $font-display; font-size: 16px; color: $gray-900; }
+}
+.seeAll { display: flex; align-items: center; gap: sp(1); font-size: 13px; color: $primary-700; font-weight: 600; &:hover { text-decoration: underline; } }
+.pendingCount { background: $error-100; color: $error-500; font-size: 12px; font-weight: 700; padding: sp(1) sp(2); border-radius: $radius-full; }
+.empty { display: flex; flex-direction: column; align-items: center; gap: sp(3); padding: sp(8) 0; color: $gray-400; text-align: center;
+  svg { opacity: 0.4; }
+  p { font-size: 14px; color: $gray-500; }
+}
+
+.scheduleList { display: flex; flex-direction: column; gap: sp(3); }
+.scheduleItem { display: flex; align-items: center; gap: sp(3); padding: sp(3); border: 1px solid $gray-200; border-radius: $radius-md; }
+.timeCol { min-width: 46px; flex-shrink: 0;
+  span { font-size: 14px; font-weight: 700; color: $primary-700; }
+}
+
+.pendingList { display: flex; flex-direction: column; gap: sp(3); }
+.pendingItem { display: flex; align-items: center; gap: sp(3); padding: sp(3); border: 1px solid $gray-200; border-radius: $radius-md; }
+.pendingBtns { margin-left: auto; }
+
+.patAvatar {
+  width: 36px; height: 36px; border-radius: $radius-full; flex-shrink: 0;
+  background: $primary-100; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  img { width: 100%; height: 100%; object-fit: cover; }
+  span { font-size: 13px; font-weight: 700; color: $primary-700; }
+}
+.patInfo { flex: 1; min-width: 0;
+  strong { display: block; font-size: 14px; font-weight: 700; color: $gray-900; @include truncate; }
+  span { display: block; font-size: 12px; color: $gray-500; }
+}
+
+.quickTitle { font-family: $font-display; font-size: 16px; color: $gray-900; margin-bottom: sp(4); }
+.quickActions { display: grid; grid-template-columns: repeat(4, 1fr); gap: sp(4);
+  @media (max-width: $bp-lg)  { grid-template-columns: repeat(2, 1fr); }
+}
+.quickCard { display: flex; flex-direction: column; align-items: center; gap: sp(2); padding: sp(5);
+  border: 1.5px solid $gray-200; border-radius: $radius-lg; text-align: center; text-decoration: none;
+  transition: all $transition-base;
+  &:hover { border-color: $primary-400; background: $primary-50; transform: translateY(-2px); box-shadow: $shadow-sm; }
+}
+.quickIcon  { font-size: 28px; }
+.quickLabel { font-size: 14px; font-weight: 700; color: $gray-900; }
+.quickDesc  { font-size: 12px; color: $gray-500; }
