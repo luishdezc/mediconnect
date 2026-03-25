@@ -1,0 +1,19 @@
+@use '../../styles/variables' as *;
+
+.stars {
+  display: inline-flex; align-items: center; gap: 2px;
+}
+
+.star {
+  background: none; border: none; padding: 2px; cursor: pointer;
+  display: flex; align-items: center; transition: transform $transition-fast;
+  &:hover:not(:disabled) { transform: scale(1.15); }
+  &:disabled { cursor: default; }
+}
+
+.stars--readonly .star { cursor: default; }
+
+.num {
+  font-size: 15px; font-weight: 700; color: $gray-800; margin-left: sp(1);
+}
+.total { font-size: 13px; font-weight: 400; color: $gray-500; }
