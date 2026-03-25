@@ -1,0 +1,82 @@
+@use '../../styles/variables' as *;
+
+.wrap { position: relative; }
+
+.bell {
+  width: 38px; height: 38px; border-radius: $radius-md; border: none;
+  background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.8);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; position: relative; transition: all $transition-fast;
+  &:hover { background: rgba(255,255,255,0.2); color: $white; }
+  &--active { color: $white; }
+}
+
+.badge {
+  position: absolute; top: -4px; right: -4px;
+  background: $error-500; color: $white;
+  font-size: 10px; font-weight: 800; min-width: 18px; height: 18px;
+  border-radius: $radius-full; display: flex; align-items: center; justify-content: center;
+  padding: 0 sp(1); border: 2px solid $primary-900;
+  animation: popIn 0.2s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+
+.panel {
+  position: absolute; top: calc(100% + sp(3)); right: 0;
+  width: 340px; background: $white; border-radius: $radius-xl;
+  box-shadow: $shadow-xl; border: 1px solid $gray-200;
+  z-index: 500; overflow: hidden;
+  animation: slideDown 0.2s cubic-bezier(0.34,1.56,0.64,1);
+  @media (max-width: 400px) { width: calc(100vw - 32px); right: -8px; }
+}
+
+@keyframes slideDown { from { opacity:0; transform: translateY(-8px) scale(0.97); } to { opacity:1; transform: none; } }
+
+.panelHeader {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: sp(4) sp(5); border-bottom: 1px solid $gray-100;
+  font-size: 14px; font-weight: 700; color: $gray-900;
+}
+.clearBtn {
+  background: none; border: none; font-size: 12px; color: $gray-500;
+  cursor: pointer; &:hover { color: $error-500; }
+}
+
+.empty {
+  display: flex; flex-direction: column; align-items: center; gap: sp(2);
+  padding: sp(10) sp(4); color: $gray-400;
+  svg { opacity: 0.4; }
+  p { font-size: 13px; }
+}
+
+.list { list-style: none; max-height: 400px; overflow-y: auto; }
+
+.item {
+  display: flex; align-items: flex-start; gap: sp(3); padding: sp(4) sp(5);
+  border-bottom: 1px solid $gray-100; position: relative;
+  transition: background $transition-fast;
+  &:last-child { border-bottom: none; }
+  &:hover { background: $gray-50; }
+  &--unread { background: $primary-50;
+    &::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: $primary-600; }
+  }
+}
+.itemIcon {
+  width: 30px; height: 30px; border-radius: $radius-md; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  &[data-type='appointment:new']          { background: $primary-50; color: $primary-700; }
+  &[data-type='appointment:statusUpdate'] { background: $success-100; color: $success-500; }
+  &[data-type='chat:message']             { background: #ebf4ff; color: #2b6cb0; }
+  &[data-type='generic']                  { background: $gray-100; color: $gray-600; }
+}
+.itemContent { flex: 1; min-width: 0;
+  strong { display: block; font-size: 13px; font-weight: 700; color: $gray-900; margin-bottom: 2px; @include truncate; }
+  span   { display: block; font-size: 12px; color: $gray-600; @include truncate; }
+  time   { display: block; font-size: 11px; color: $gray-400; margin-top: sp(1); }
+}
+.dismissBtn {
+  background: none; border: none; color: $gray-300; cursor: pointer; padding: sp(1);
+  border-radius: $radius-sm; display: flex; align-items: center; flex-shrink: 0;
+  &:hover { color: $gray-600; background: $gray-100; }
+}

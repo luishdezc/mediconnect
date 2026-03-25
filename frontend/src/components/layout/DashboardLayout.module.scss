@@ -1,0 +1,7 @@
+@use '../../styles/variables' as *;
+
+.layout { display: flex; min-height: 100vh; }
+.main { flex: 1; min-width: 0; overflow-y: auto; background: $gray-100; }
+.content { padding: sp(6) sp(6); max-width: 1200px;
+  @media (max-width: #{$bp-md - 1px}) { padding: sp(16) sp(4) sp(4); }
+}
