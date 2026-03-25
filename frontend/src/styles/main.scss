@@ -1,0 +1,59 @@
+@use 'variables' as *;
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: $font-body;
+  color: $gray-900;
+  background: $gray-100;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+a { color: $primary-700; text-decoration: none; &:hover { color: $primary-600; } }
+img { max-width: 100%; display: block; }
+button { cursor: pointer; font-family: $font-body; }
+input, select, textarea { font-family: $font-body; }
+
+.container { width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 sp(4); }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: $gray-100; }
+::-webkit-scrollbar-thumb { background: $gray-400; border-radius: $radius-full; &:hover { background: $gray-500; } }
+
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+.truncate { @include truncate; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: sp(1);
+  padding: sp(1) sp(2); border-radius: $radius-full;
+  font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+
+  &--pending   { background: $warning-100; color: $warning-500; }
+  &--confirmed { background: $success-100; color: $success-500; }
+  &--completed { background: $primary-50;  color: $primary-700; }
+  &--cancelled { background: $gray-200;    color: $gray-600; }
+  &--in_progress { background: #e8f4fd; color: #2b7ab5; }
+  &--no_show   { background: $error-100;   color: $error-500; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideInRight { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .5; } }
+
+.animate-fadeInUp { animation: fadeInUp 0.4s ease both; }
+.animate-fadeIn   { animation: fadeIn   0.3s ease both; }
+
+.skeleton {
+  background: linear-gradient(90deg, $gray-200 25%, $gray-100 50%, $gray-200 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: $radius-md;
+}
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
