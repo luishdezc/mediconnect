@@ -1,0 +1,238 @@
+@use '../../styles/variables' as *;
+
+.page { min-height: 100vh; background: $white; font-family: $font-body; }
+
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(255,255,255,0.9); backdrop-filter: blur(12px);
+  border-bottom: 1px solid $gray-200;
+}
+.navInner {
+  max-width: 1200px; margin: 0 auto; padding: 0 sp(6);
+  height: 68px; display: flex; align-items: center; gap: sp(8);
+}
+.navBrand { display: flex; align-items: center; gap: sp(2); text-decoration: none;
+  span { font-size: 24px; }
+  strong { font-family: $font-display; font-size: 20px; color: $gray-900; }
+}
+.navLinks { display: flex; gap: sp(6); flex: 1;
+  @media (max-width: $bp-md) { display: none; }
+  a { font-size: 14px; color: $gray-600; font-weight: 500; text-decoration: none;
+    &:hover { color: $primary-700; }
+  }
+}
+.navActions { display: flex; gap: sp(3); margin-left: auto; }
+.loginBtn {
+  padding: sp(2) sp(4); font-size: 14px; font-weight: 600; color: $gray-700;
+  text-decoration: none; border-radius: $radius-md; transition: all $transition-fast;
+  &:hover { background: $gray-100; }
+}
+.registerBtn {
+  padding: sp(2) sp(4); font-size: 14px; font-weight: 600; color: $white;
+  background: $primary-700; text-decoration: none; border-radius: $radius-md;
+  transition: all $transition-fast;
+  &:hover { background: $primary-800; transform: translateY(-1px); }
+}
+
+.hero {
+  min-height: 100vh; display: grid; grid-template-columns: 1fr 1fr;
+  gap: sp(12); align-items: center; padding: 120px sp(8) sp(16);
+  max-width: 1200px; margin: 0 auto;
+  @media (max-width: $bp-lg) { grid-template-columns: 1fr; padding-top: 100px; }
+}
+.heroContent { display: flex; flex-direction: column; gap: sp(6); }
+.heroBadge {
+  display: inline-flex; align-items: center; gap: sp(2);
+  background: $primary-50; color: $primary-700; border: 1px solid $primary-200;
+  font-size: 13px; font-weight: 600; padding: sp(2) sp(4); border-radius: $radius-full;
+  width: fit-content;
+}
+.heroContent h1 {
+  font-family: $font-display; font-size: clamp(40px, 6vw, 72px);
+  font-weight: 700; color: $gray-900; line-height: 1.08; letter-spacing: -1px;
+  span { color: $primary-700; }
+}
+.heroContent p {
+  font-size: 18px; color: $gray-600; line-height: 1.7; max-width: 480px;
+}
+.heroCtas { display: flex; align-items: center; gap: sp(4); flex-wrap: wrap; }
+.ctaPrimary {
+  display: inline-flex; align-items: center; gap: sp(2); padding: sp(4) sp(7);
+  background: $primary-700; color: $white; font-size: 15px; font-weight: 700;
+  border-radius: $radius-md; text-decoration: none; transition: all $transition-fast;
+  &:hover { background: $primary-800; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26,107,92,0.3); color: $white; }
+}
+.ctaSecondary {
+  font-size: 14px; color: $gray-600; text-decoration: none;
+  span { color: $primary-700; font-weight: 700; }
+  &:hover span { text-decoration: underline; }
+}
+.heroStats { display: flex; align-items: center; gap: sp(5); padding-top: sp(4);
+  strong { display: block; font-family: $font-display; font-size: 28px; color: $gray-900; }
+  span   { font-size: 13px; color: $gray-500; }
+}
+.statDiv { width: 1px; height: 40px; background: $gray-200; }
+
+.heroVisual {
+  position: relative; display: flex; align-items: center; justify-content: center;
+  @media (max-width: $bp-lg) { display: none; }
+}
+.heroCard {
+  background: $white; border-radius: $radius-xl; box-shadow: $shadow-xl;
+  border: 1px solid $gray-200; padding: sp(6); width: 300px;
+}
+.heroCardTop {
+  display: flex; align-items: center; gap: sp(3); margin-bottom: sp(4);
+  strong { display: block; font-size: 15px; font-weight: 700; color: $gray-900; }
+  span   { font-size: 12px; color: $gray-600; }
+}
+.heroAvatar {
+  width: 48px; height: 48px; border-radius: $radius-full;
+  background: $primary-100; display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.heroVerified {
+  margin-left: auto; font-size: 11px; color: $success-500; display: flex; align-items: center; gap: 3px;
+  background: $success-100; padding: sp(1) sp(2); border-radius: $radius-full; flex-shrink: 0;
+}
+.heroSlots { display: grid; grid-template-columns: repeat(5, 1fr); gap: sp(2); margin-bottom: sp(4); }
+.heroSlot {
+  text-align: center; padding: sp(2) 0; border: 1.5px solid $gray-200; border-radius: $radius-md;
+  font-size: 12px; font-weight: 600; color: $gray-700;
+  &--selected { background: $primary-700; color: $white; border-color: $primary-700; }
+}
+.heroBookBtn {
+  background: $primary-700; color: $white; text-align: center;
+  padding: sp(3); border-radius: $radius-md; font-size: 14px; font-weight: 700;
+}
+
+.heroFloatCard1 {
+  position: absolute; bottom: -20px; left: -40px;
+  background: $success-100; border: 1px solid #9ae6b4; border-radius: $radius-lg;
+  padding: sp(3) sp(4); font-size: 13px; font-weight: 700; color: $success-500;
+  display: flex; align-items: center; gap: sp(2); box-shadow: $shadow-md;
+  animation: float 3s ease-in-out infinite;
+  span { display: block; font-size: 11px; font-weight: 400; color: $gray-600; }
+}
+.heroFloatCard2 {
+  position: absolute; top: -10px; right: -30px;
+  background: $white; border: 1px solid $gray-200; border-radius: $radius-lg;
+  padding: sp(3) sp(4); font-size: 13px; font-weight: 600; color: $gray-800;
+  box-shadow: $shadow-md; animation: float 3.5s ease-in-out infinite reverse;
+}
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+.sectionInner {
+  max-width: 1200px; margin: 0 auto; padding: sp(20) sp(8);
+  @media (max-width: $bp-md) { padding: sp(14) sp(4); }
+}
+.sectionLabel {
+  font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em;
+  color: $primary-600; margin-bottom: sp(3);
+}
+.sectionInner h2 {
+  font-family: $font-display; font-size: clamp(28px, 4vw, 48px); color: $gray-900;
+  line-height: 1.15; margin-bottom: sp(12);
+}
+
+.features { background: $gray-100; }
+.featuresGrid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: sp(6);
+  @media (max-width: $bp-lg) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: $bp-sm) { grid-template-columns: 1fr; }
+}
+.featureCard {
+  background: $white; border-radius: $radius-xl; padding: sp(7);
+  border: 1px solid $gray-200; transition: all $transition-base;
+  &:hover { transform: translateY(-4px); box-shadow: $shadow-md; border-color: $primary-200; }
+}
+.featureIcon {
+  width: 56px; height: 56px; border-radius: $radius-lg;
+  background: $primary-50; color: $primary-700;
+  display: flex; align-items: center; justify-content: center; margin-bottom: sp(4);
+}
+.featureCard h3 { font-family: $font-display; font-size: 18px; color: $gray-900; margin-bottom: sp(2); }
+.featureCard p  { font-size: 14px; color: $gray-600; line-height: 1.7; }
+
+.howSection { background: $white; }
+.stepsGrid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: sp(8); position: relative;
+  @media (max-width: $bp-lg) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: $bp-sm) { grid-template-columns: 1fr; }
+}
+.step { display: flex; flex-direction: column; gap: sp(3); position: relative; }
+.stepNum {
+  font-family: $font-display; font-size: 48px; font-weight: 800;
+  color: $primary-100; line-height: 1; margin-bottom: sp(1);
+}
+.stepLine {
+  position: absolute; top: 28px; left: calc(100% + sp(4)); right: calc(-100% - sp(4));
+  height: 2px; background: repeating-linear-gradient(to right, $primary-200 0, $primary-200 6px, transparent 6px, transparent 12px);
+  @media (max-width: $bp-lg) { display: none; }
+}
+.step h3 { font-family: $font-display; font-size: 18px; color: $gray-900; }
+.step p  { font-size: 14px; color: $gray-600; line-height: 1.7; }
+
+.doctorsSection { background: $gray-100; }
+.doctorsGrid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: sp(5);
+  @media (max-width: $bp-md) { grid-template-columns: 1fr; }
+}
+.docCard {
+  background: $white; border-radius: $radius-xl; padding: sp(7);
+  text-align: center; border: 1px solid $gray-200;
+  display: flex; flex-direction: column; align-items: center; gap: sp(2);
+}
+.docAvatar {
+  width: 72px; height: 72px; border-radius: $radius-full;
+  background: $primary-100; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  margin-bottom: sp(2);
+  img { width: 100%; height: 100%; object-fit: cover; }
+  span { font-size: 26px; font-weight: 700; color: $primary-700; }
+}
+.docCard h3    { font-family: $font-display; font-size: 17px; color: $gray-900; }
+.docSpec       { font-size: 13px; color: $primary-700; font-weight: 600; }
+.docRating { display: flex; align-items: center; gap: sp(1); font-size: 14px; font-weight: 700; color: $warning-500;
+  span { font-weight: 400; color: $gray-500; font-size: 12px; }
+}
+.docLocation { display: flex; align-items: center; gap: sp(1); font-size: 12px; color: $gray-500; }
+.doctorsCta { text-align: center; margin-top: sp(10); }
+
+.ctaBanner {
+  background: linear-gradient(135deg, $primary-900 0%, $primary-700 100%);
+  padding: sp(20) sp(8);
+}
+.ctaBannerInner {
+  max-width: 600px; margin: 0 auto; text-align: center; display: flex; flex-direction: column;
+  align-items: center; gap: sp(5);
+  h2 { font-family: $font-display; font-size: clamp(28px, 4vw, 44px); color: $white; }
+  p  { font-size: 16px; color: rgba(255,255,255,0.75); }
+}
+.ctaPrimaryLg {
+  display: inline-flex; align-items: center; gap: sp(3); padding: sp(5) sp(9);
+  background: $white; color: $primary-700; font-size: 16px; font-weight: 800;
+  border-radius: $radius-md; text-decoration: none; transition: all $transition-fast;
+  &:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,0.2); color: $primary-800; }
+}
+
+.footer { background: $gray-900; padding: sp(12) sp(8) sp(6); }
+.footerInner {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; align-items: flex-start; justify-content: space-between; gap: sp(8); flex-wrap: wrap;
+  margin-bottom: sp(8);
+}
+.footerBrand {
+  display: flex; flex-direction: column; gap: sp(2);
+  span { font-size: 28px; }
+  strong { font-family: $font-display; font-size: 20px; color: $white; }
+  p { font-size: 13px; color: rgba(255,255,255,0.5); }
+}
+.footerLinks { display: flex; flex-direction: column; gap: sp(3);
+  a { font-size: 14px; color: rgba(255,255,255,0.6); text-decoration: none;
+    &:hover { color: $white; }
+  }
+}
+.footerCopy {
+  max-width: 1200px; margin: 0 auto; padding-top: sp(6); border-top: 1px solid rgba(255,255,255,0.1);
+  font-size: 13px; color: rgba(255,255,255,0.4); text-align: center;
+}
