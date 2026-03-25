@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import styles from './SetupAdmin.module.scss';
+import styles from './SetupAdminPage.module.scss';
 
 const SetupAdminPage: React.FC = () => {
   const navigate = useNavigate();
