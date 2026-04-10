@@ -1,0 +1,72 @@
+@use '../../styles/variables' as *;
+
+.wrap { display: flex; flex-direction: column; gap: sp(5); }
+
+.patBanner {
+  display: flex; align-items: center; gap: sp(3); padding: sp(4);
+  background: $primary-50; border-radius: $radius-md; border: 1px solid $primary-100;
+  strong { display: block; font-size: 15px; color: $gray-900; font-weight: 700; }
+  span { display: block; font-size: 13px; color: $gray-600; }
+}
+.patAvatar {
+  width: 44px; height: 44px; border-radius: $radius-full; flex-shrink: 0;
+  background: $primary-200; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  img { width: 100%; height: 100%; object-fit: cover; }
+  span { font-size: 16px; font-weight: 700; color: $primary-700; }
+}
+.dateTag {
+  margin-left: auto; background: $white; border: 1px solid $primary-200;
+  color: $primary-700; font-size: 12px; font-weight: 600;
+  padding: sp(1) sp(3); border-radius: $radius-full; white-space: nowrap; flex-shrink: 0;
+}
+
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: sp(4);
+  @media (max-width: $bp-md) { grid-template-columns: 1fr; }
+}
+.fullCol { grid-column: 1 / -1; }
+
+.fieldLabel { font-size: 13px; font-weight: 600; color: $gray-700; margin-bottom: sp(2); display: block; }
+
+.symptomRow { display: flex; gap: sp(2); }
+.symptomInput {
+  flex: 1; height: 42px; padding: 0 sp(3); border: 1.5px solid $gray-300; border-radius: $radius-md;
+  font-family: $font-body; font-size: 14px; color: $gray-900; outline: none;
+  &:focus { border-color: $primary-500; box-shadow: 0 0 0 3px rgba(34,145,120,0.1); }
+  &::placeholder { color: $gray-400; }
+}
+.addBtn {
+  width: 42px; height: 42px; border-radius: $radius-md; border: none;
+  background: $primary-700; color: $white; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: background $transition-fast;
+  &:hover { background: $primary-800; }
+}
+.tags { display: flex; flex-wrap: wrap; gap: sp(2); margin-top: sp(2); }
+.tag {
+  display: flex; align-items: center; gap: sp(1); padding: sp(1) sp(3);
+  background: $primary-50; border: 1px solid $primary-200; border-radius: $radius-full;
+  color: $primary-700; font-size: 13px; font-weight: 500;
+  button { background: none; border: none; cursor: pointer; display: flex; align-items: center; color: $primary-600; padding: 0; &:hover { color: $error-500; } }
+}
+
+.uploadSection { display: flex; flex-direction: column; gap: sp(3); }
+.uploadZone {
+  display: flex; flex-direction: column; align-items: center; gap: sp(2); padding: sp(6);
+  border: 2px dashed $gray-300; border-radius: $radius-lg; cursor: pointer; text-align: center;
+  transition: all $transition-fast; color: $gray-500;
+  &:hover { border-color: $primary-400; background: $primary-50; color: $primary-700; }
+  svg { color: $gray-400; }
+  span { font-size: 14px; font-weight: 500; }
+}
+.uploadHint { font-size: 12px; color: $gray-400; font-weight: 400 !important; }
+
+.fileList { display: flex; flex-direction: column; gap: sp(2); }
+.fileItem {
+  display: flex; align-items: center; gap: sp(3); padding: sp(2) sp(3);
+  background: $gray-50; border: 1px solid $gray-200; border-radius: $radius-md;
+  font-size: 13px; color: $gray-700;
+  span:first-child { flex: 1; @include truncate; }
+  button { background: none; border: none; cursor: pointer; color: $gray-400; display: flex; align-items: center; &:hover { color: $error-500; } }
+}
+.fileSize { font-size: 11px; color: $gray-400; flex-shrink: 0; }
+
+.footer { display: flex; justify-content: flex-end; gap: sp(3); padding-top: sp(3); border-top: 1px solid $gray-200; }
