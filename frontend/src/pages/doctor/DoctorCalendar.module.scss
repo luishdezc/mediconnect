@@ -1,0 +1,139 @@
+@use '../../styles/variables' as *;
+
+.page { display: flex; flex-direction: column; gap: sp(5); animation: fadeInUp 0.4s ease; }
+
+.header {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: sp(4); flex-wrap: wrap;
+  h1 { font-family: $font-display; font-size: 28px; color: $gray-900; margin-bottom: sp(1); }
+  p  { color: $gray-600; font-size: 14px; text-transform: capitalize; }
+}
+.navRow { display: flex; align-items: center; gap: sp(2); }
+.navBtn {
+  width: 34px; height: 34px; border-radius: $radius-md; border: 1px solid $gray-200;
+  background: $white; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: $gray-600; transition: all $transition-fast;
+  &:hover { border-color: $primary-400; color: $primary-700; }
+}
+
+/* ── Layout ─────────────────────────────────────────────────────────────────── */
+.calLayout {
+  display: grid; grid-template-columns: 1fr 280px; gap: sp(5); align-items: start;
+  @media (max-width: $bp-xl) { grid-template-columns: 1fr 240px; }
+  @media (max-width: $bp-lg) { grid-template-columns: 1fr; }
+}
+
+/* ── Calendar grid ───────────────────────────────────────────────────────────── */
+.calWrap { overflow: hidden; }
+
+.dayHeaders {
+  display: grid; grid-template-columns: 52px repeat(7, 1fr);
+  border-bottom: 1px solid $gray-200; position: sticky; top: 0; z-index: 2; background: $white;
+}
+.timeGutter { /* left gutter */ }
+.dayHeader {
+  padding: sp(3) sp(2); text-align: center; border-left: 1px solid $gray-100;
+  display: flex; flex-direction: column; align-items: center; gap: sp(1);
+  &--today { background: $primary-50; }
+}
+.dayName { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: $gray-500; }
+.dayNum  {
+  font-family: $font-display; font-size: 20px; font-weight: 700; color: $gray-900; line-height: 1;
+  .dayHeader--today & { color: $primary-700; background: $primary-100; width: 32px; height: 32px;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+}
+.dayCount { font-size: 10px; background: $primary-600; color: $white; border-radius: $radius-full; padding: 1px 6px; }
+
+/* Grid body */
+.gridBody { position: relative; display: grid; grid-template-columns: 52px 1fr; }
+.hourRows {
+  display: flex; flex-direction: column;
+  border-right: 1px solid $gray-200;
+}
+.hourRow {
+  height: 60px; display: flex; align-items: flex-start; position: relative;
+}
+.hourLabel {
+  font-size: 11px; color: $gray-400; font-weight: 600; width: 52px; padding: sp(1) sp(2) 0;
+  flex-shrink: 0; text-align: right;
+}
+.hourLine { display: none; }
+
+.dayColumns {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  position: relative;
+  &::before {
+    content: ''; position: absolute; left: 0; right: 0; top: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 59px,
+      $gray-100 59px,
+      $gray-100 60px
+    );
+    height: 100%; pointer-events: none;
+  }
+}
+.dayColumn {
+  position: relative; border-left: 1px solid $gray-100;
+  min-height: calc(60px * 14); // 14 hours
+  &--today { background: rgba($primary-700, 0.02); }
+}
+
+/* Appointment blocks */
+.apptBlock {
+  position: absolute; left: 2px; right: 2px;
+  border-left: 3px solid $primary-600; background: $primary-50;
+  border-radius: 0 $radius-sm $radius-sm 0;
+  padding: sp(1) sp(2); text-align: left; cursor: pointer;
+  display: flex; flex-direction: column; gap: 1px; overflow: hidden;
+  border-top: 1px solid $primary-100; border-right: 1px solid $primary-100; border-bottom: 1px solid $primary-100;
+  transition: all $transition-fast; z-index: 1;
+  &:hover { z-index: 5; transform: scale(1.02); box-shadow: $shadow-sm; }
+  &--selected { z-index: 5; box-shadow: 0 0 0 2px $primary-600; }
+}
+.apptTime { font-size: 10px; font-weight: 700; color: $primary-700; }
+.apptName { font-size: 11px; font-weight: 600; color: $gray-800; @include truncate; }
+
+/* ── Detail panel ────────────────────────────────────────────────────────────── */
+.detailPanel { display: flex; flex-direction: column; gap: sp(4); }
+.noSelected {
+  display: flex; flex-direction: column; align-items: center; gap: sp(3);
+  padding: sp(8) sp(4); color: $gray-400; text-align: center;
+  p { font-size: 13px; color: $gray-500; }
+}
+
+.detail { overflow: hidden; }
+.statusBar {
+  padding: sp(2) sp(5); font-size: 12px; font-weight: 800;
+  color: $white; text-align: center; text-transform: uppercase; letter-spacing: 0.06em;
+}
+.detailBody { padding: sp(5); display: flex; flex-direction: column; gap: sp(5); }
+
+.patRow { display: flex; align-items: center; gap: sp(3); }
+.patAvatar {
+  width: 44px; height: 44px; border-radius: $radius-full; flex-shrink: 0;
+  background: $primary-100; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  img { width: 100%; height: 100%; object-fit: cover; }
+  span { font-size: 16px; font-weight: 700; color: $primary-700; }
+}
+.patRow strong { display: block; font-size: 15px; font-weight: 700; color: $gray-900; }
+.patRow span   { display: block; font-size: 12px; color: $gray-500; }
+
+.detailFields { display: flex; flex-direction: column; gap: sp(3); }
+.detailField {
+  label { display: flex; align-items: center; gap: sp(1); font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em; color: $gray-400; margin-bottom: sp(1);
+    svg { color: $gray-400; }
+  }
+  span { font-size: 14px; color: $gray-800; text-transform: capitalize; }
+}
+.detailActions { display: flex; flex-direction: column; gap: sp(2); }
+
+/* Summary stats */
+.summaryTitle { font-size: 13px; font-weight: 700; color: $gray-700; margin-bottom: sp(4); text-transform: uppercase; letter-spacing: 0.05em; }
+.summaryStats { display: grid; grid-template-columns: repeat(3, 1fr); gap: sp(2); }
+.summaryStat {
+  text-align: center; padding: sp(3); background: $gray-50; border-radius: $radius-md;
+  span  { display: block; font-family: $font-display; font-size: 22px; font-weight: 700; }
+  label { display: block; font-size: 11px; color: $gray-500; margin-top: sp(1); }
+}
