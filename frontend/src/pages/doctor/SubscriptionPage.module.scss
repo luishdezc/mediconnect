@@ -1,0 +1,75 @@
+@use '../../styles/variables' as *;
+
+.page { display: flex; flex-direction: column; gap: sp(6); animation: fadeInUp 0.4s ease; }
+.header {
+  h1 { font-family: $font-display; font-size: 28px; color: $gray-900; margin-bottom: sp(1); }
+  p { color: $gray-600; font-size: 14px; }
+}
+
+.activeAlert {
+  display: flex; align-items: flex-start; gap: sp(3); padding: sp(4) sp(5);
+  background: $success-100; border: 1px solid #9ae6b4; border-radius: $radius-md; color: $success-500;
+  svg { flex-shrink: 0; }
+  strong { display: block; font-size: 15px; font-weight: 700; color: $gray-900; margin-bottom: sp(1); }
+  p { font-size: 13px; color: $gray-600; }
+}
+
+.plans { display: grid; grid-template-columns: 1fr 1fr; gap: sp(6);
+  @media (max-width: $bp-md) { grid-template-columns: 1fr; }
+}
+
+.planCard {
+  display: flex; flex-direction: column; gap: sp(5); position: relative;
+  &--pro {
+    border-color: $primary-400; box-shadow: 0 0 0 2px $primary-200, $shadow-md;
+  }
+}
+
+.proBadge {
+  position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+  background: $primary-700; color: $white; font-size: 12px; font-weight: 700;
+  padding: sp(1) sp(3); border-radius: $radius-full; display: flex; align-items: center; gap: sp(1);
+  white-space: nowrap;
+}
+
+.planHeader { display: flex; flex-direction: column; align-items: center; gap: sp(3); text-align: center;
+  h2 { font-family: $font-display; font-size: 22px; color: $gray-900; }
+}
+.planIconWrap {
+  width: 56px; height: 56px; border-radius: $radius-lg;
+  display: flex; align-items: center; justify-content: center;
+  &[data-color='gray'] { background: $gray-100; color: $gray-600; }
+  &[data-color='green'] { background: $primary-50; color: $primary-700; }
+}
+.price { display: flex; align-items: baseline; gap: sp(1); }
+.priceAmount { font-family: $font-display; font-size: 40px; font-weight: 700; color: $gray-900; }
+.pricePer { font-size: 14px; color: $gray-500; }
+
+.currentBadge {
+  background: $gray-100; color: $gray-600; font-size: 12px; font-weight: 600;
+  padding: sp(1) sp(3); border-radius: $radius-full;
+}
+
+.features {
+  list-style: none; display: flex; flex-direction: column; gap: sp(3); flex: 1;
+  li { display: flex; align-items: center; gap: sp(3); font-size: 14px; color: $gray-700;
+    svg { flex-shrink: 0; color: $gray-400; }
+  }
+  &--pro svg { color: $primary-600 !important; }
+}
+
+.activeCheck {
+  display: flex; align-items: center; justify-content: center; gap: sp(2);
+  padding: sp(3); background: $success-100; border-radius: $radius-md;
+  color: $success-500; font-size: 15px; font-weight: 700;
+}
+
+.benefitsTitle { font-family: $font-display; font-size: 18px; color: $gray-900; margin-bottom: sp(5); }
+.benefitsGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: sp(5);
+  @media (max-width: $bp-sm) { grid-template-columns: 1fr; }
+}
+.benefit { display: flex; align-items: flex-start; gap: sp(4);
+  strong { display: block; font-size: 15px; font-weight: 700; color: $gray-900; margin-bottom: sp(1); }
+  p { font-size: 13px; color: $gray-600; line-height: 1.5; }
+}
+.benefitIcon { font-size: 32px; flex-shrink: 0; }
