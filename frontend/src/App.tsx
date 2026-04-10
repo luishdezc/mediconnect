@@ -5,12 +5,18 @@ import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { useAuthStore } from './store/authStore';
-import LoginPage            from './pages/auth/LoginPage';
-import RegisterPage         from './pages/auth/RegisterPage';
-import PatientDashboard     from './pages/patient/PatientDashboard';
-import DoctorDashboard      from './pages/doctor/DoctorDashboard';
-import SetupAdminPage       from './pages/auth/SetupAdminPage';
-import LandingPage           from './pages/auth/LandingPage';
+import LoginPage from './pages/auth/LoginPage';
+import RegisterPage from './pages/auth/RegisterPage';
+import PatientDashboard from './pages/patient/PatientDashboard';
+import DoctorDashboard from './pages/doctor/DoctorDashboard';
+import DoctorAppointments from './pages/doctor/DoctorAppointments';
+import DoctorPatientsPage from './pages/doctor/DoctorPatients';
+import SubscriptionPage from './pages/doctor/SubscriptionPage';
+import SetupAdminPage from './pages/auth/SetupAdminPage';
+import AvailabilityPage from './pages/doctor/AvailabilityPage';
+import DoctorCalendarPage from './pages/doctor/DoctorCalendar';
+import LandingPage from './pages/auth/LandingPage';
+import SettingsPage from './pages/shared/SettingsPage';
 import './styles/main.scss';
 
 function RequireAuth({ children, roles }: { children: React.ReactElement; roles?: string[] }) {
@@ -84,7 +90,19 @@ function AppContent() {
         <Route path="/patient/dashboard"    element={<RequireAuth roles={['patient']}><PatientDashboard /></RequireAuth>} />
 
         {/* Doctor */}
-        <Route path="/doctor/dashboard"     element={<RequireAuth roles={['doctor']}><DoctorDashboard /></RequireAuth>} />
+        <Route path="/doctor/dashboard" element={<RequireAuth roles={['doctor']}><DoctorDashboard /></RequireAuth>} />
+        <Route path="/doctor/appointments" element={<RequireAuth roles={['doctor']}><DoctorAppointments /></RequireAuth>} />
+        <Route path="/doctor/patients" element={<RequireAuth roles={['doctor']}><DoctorPatientsPage /></RequireAuth>} />
+        <Route path="/doctor/subscription" element={<RequireAuth roles={['doctor']}><SubscriptionPage /></RequireAuth>} />
+
+        {/* Doctor availability */}
+        <Route path="/doctor/availability" element={<RequireAuth roles={['doctor']}><AvailabilityPage /></RequireAuth>} />
+
+        {/* Settings - all authenticated users */}
+        <Route path="/settings" element={<RequireAuth><SettingsPage /></RequireAuth>} />
+
+        {/* Doctor calendar */}
+        <Route path="/doctor/calendar" element={<RequireAuth roles={['doctor']}><DoctorCalendarPage /></RequireAuth>} />
 
         {/* Admin setup - first time only */}
         <Route path="/setup-admin" element={<SetupAdminPage />} />
