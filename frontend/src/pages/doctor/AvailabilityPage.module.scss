@@ -1,0 +1,96 @@
+@use '../../styles/variables' as *;
+
+.page { display: flex; flex-direction: column; gap: sp(5); animation: fadeInUp 0.4s ease; }
+.header { display: flex; align-items: flex-start; justify-content: space-between; gap: sp(4); flex-wrap: wrap;
+  h1 { font-family: $font-display; font-size: 28px; color: $gray-900; margin-bottom: sp(1); }
+  p  { color: $gray-600; font-size: 14px; }
+}
+.info { display: flex; align-items: flex-start; gap: sp(2); padding: sp(3) sp(4); background: #ebf8ff; border: 1px solid #90cdf4; border-radius: $radius-md; font-size: 13px; color: #2b6cb0;
+  svg { flex-shrink: 0; margin-top: 2px; }
+  strong { color: #1a4e6e; }
+}
+.layout { display: grid; grid-template-columns: 260px 1fr; gap: sp(5); align-items: start;
+  @media (max-width: $bp-lg) { grid-template-columns: 1fr; }
+}
+
+
+.dayList { @include card; overflow: hidden; }
+.dayListHeader { display: flex; align-items: center; justify-content: space-between; padding: sp(4) sp(5); border-bottom: 1px solid $gray-200; font-size: 12px; font-weight: 700; color: $gray-700; text-transform: uppercase; letter-spacing: 0.05em; }
+.enabledBadge { background: $primary-50; color: $primary-700; border: 1px solid $primary-200; font-size: 11px; padding: sp(1) sp(2); border-radius: $radius-full; }
+.dayCard { padding: sp(3) sp(4); border-bottom: 1px solid $gray-100; cursor: pointer; transition: background $transition-fast;
+  &:last-child { border-bottom: none; }
+  &--off { opacity: 0.6; }
+  &--selected { background: $primary-50 !important; }
+  &:hover { background: $gray-50; }
+}
+.dayCardTop { display: flex; align-items: center; gap: sp(3); }
+.dayName { flex: 1;
+  strong { display: block; font-size: 14px; font-weight: 700; color: $gray-900; }
+  span   { display: block; font-size: 11px; color: $gray-500; margin-top: 1px; }
+}
+.checkIcon { color: $primary-600; flex-shrink: 0; }
+
+.toggle { width: 36px; height: 20px; border-radius: 10px; border: none; flex-shrink: 0; background: $gray-300; cursor: pointer; position: relative; transition: background $transition-fast; padding: 0;
+  &--on { background: $primary-600; }
+}
+.toggleKnob { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: $white; transition: transform $transition-fast; display: block;
+  .toggle--on & { transform: translateX(16px); }
+}
+
+.editor { display: flex; flex-direction: column; gap: sp(4); }
+.editorHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: sp(5);
+  h3 { font-family: $font-display; font-size: 18px; color: $gray-900; }
+}
+.noDay { display: flex; flex-direction: column; align-items: center; gap: sp(3); padding: sp(10) 0; color: $gray-400; text-align: center; svg { opacity: 0.3; } }
+.disabledMsg { display: flex; flex-direction: column; align-items: center; gap: sp(4); padding: sp(6) 0; text-align: center; p { font-size: 14px; color: $gray-500; } }
+.controls { display: flex; flex-direction: column; gap: sp(6); }
+
+.durationField { display: flex; flex-direction: column; gap: sp(2); label { font-size: 13px; font-weight: 600; color: $gray-700; } }
+.durationPills { display: flex; flex-wrap: wrap; gap: sp(2); }
+.durationPill { padding: sp(2) sp(4); border: 1.5px solid $gray-300; border-radius: $radius-full; background: $white; color: $gray-700; font-size: 13px; font-weight: 600; cursor: pointer; transition: all $transition-fast;
+  &:hover { border-color: $primary-400; }
+  &--active { border-color: $primary-600; background: $primary-700; color: $white; }
+}
+
+.rangesSection { display: flex; flex-direction: column; gap: sp(3); }
+.rangesHeader { display: flex; align-items: center; justify-content: space-between;
+  label { font-size: 13px; font-weight: 600; color: $gray-700; }
+}
+.rangeRow { display: flex; align-items: flex-end; gap: sp(3); padding: sp(4); background: $gray-50; border-radius: $radius-md; border: 1px solid $gray-200; flex-wrap: wrap; }
+.rangeIndex { width: 24px; height: 24px; border-radius: 50%; background: $primary-100; color: $primary-700; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-bottom: sp(2); }
+.timeField { display: flex; flex-direction: column; gap: sp(1); flex: 1; min-width: 100px;
+  label { font-size: 12px; font-weight: 600; color: $gray-600; }
+}
+.timeSelect { height: 40px; padding: 0 sp(3); border: 1.5px solid $gray-300; border-radius: $radius-md; font-family: $font-body; font-size: 14px; font-weight: 600; color: $primary-700; background: $white; cursor: pointer; outline: none; width: 100%;
+  &:focus { border-color: $primary-500; box-shadow: 0 0 0 3px rgba(34,145,120,0.1); }
+}
+.timeSep { font-size: 18px; color: $gray-400; padding-bottom: sp(2); flex-shrink: 0; }
+.rangeInfo { display: flex; align-items: center; padding-bottom: sp(2); flex-shrink: 0; }
+.rangeSlots { font-size: 12px; font-weight: 700; color: $primary-600; background: $primary-50; padding: sp(1) sp(2); border-radius: $radius-full; }
+.rangeError  { font-size: 12px; color: $error-500; }
+.removeRange { width: 32px; height: 32px; border-radius: $radius-md; border: 1px solid $gray-300; background: $white; color: $gray-500; cursor: pointer; display: flex; align-items: center; justify-content: center; margin-bottom: sp(2); transition: all $transition-fast; flex-shrink: 0;
+  &:hover:not(:disabled) { border-color: $error-500; color: $error-500; background: $error-100; }
+  &:disabled { opacity: 0.3; cursor: not-allowed; }
+}
+.rangeHint { font-size: 12px; color: $gray-500; background: $accent-100; padding: sp(2) sp(3); border-radius: $radius-md; border: 1px solid $accent-300; }
+
+.previewHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: sp(4);
+  h4 { font-size: 14px; font-weight: 700; color: $gray-700; }
+}
+.slotCount { font-size: 13px; color: $gray-500; }
+.slotsGrid { display: flex; flex-wrap: wrap; gap: sp(2); }
+.slotChip { padding: sp(1) sp(3); background: $primary-50; border: 1px solid $primary-200; border-radius: $radius-full; font-size: 12px; font-weight: 600; color: $primary-700; }
+
+.summaryTitle { font-family: $font-display; font-size: 16px; color: $gray-900; margin-bottom: sp(4); }
+.summaryGrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: sp(2);
+  @media (max-width: $bp-lg) { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: $bp-sm) { grid-template-columns: repeat(3, 1fr); }
+}
+.summaryDay { display: flex; flex-direction: column; align-items: center; gap: sp(1); padding: sp(3) sp(2); border: 1.5px solid $gray-200; border-radius: $radius-md; cursor: pointer; text-align: center; transition: all $transition-fast;
+  &--on { border-color: $primary-300; background: $primary-50; .summaryShort { color: $primary-700; } }
+  &:hover { transform: translateY(-2px); box-shadow: $shadow-sm; }
+}
+.summaryShort { font-size: 13px; font-weight: 800; color: $gray-500; text-transform: uppercase; letter-spacing: 0.04em; }
+.summaryRange { font-size: 10px; font-weight: 600; color: $primary-700; }
+.summarySlots { font-size: 10px; color: $gray-500; }
+.summaryOff   { font-size: 11px; color: $gray-400; }
