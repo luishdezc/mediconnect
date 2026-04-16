@@ -1,0 +1,26 @@
+@use '../../styles/variables' as *;
+
+.mapWrapper {
+  position: relative; width: 100%; height: 420px; border-radius: $radius-lg;
+  overflow: hidden; border: 1px solid $gray-200;
+  @media (max-width: $bp-md) { height: 300px; }
+}
+
+.map { width: 100%; height: 100%; }
+
+.noLocation {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: sp(2);
+  background: $gray-50; color: $gray-400;
+  span { font-size: 36px; }
+  p { font-size: 14px; }
+}
+
+:global(.mediconnect-popup .leaflet-popup-content-wrapper) {
+  border-radius: 10px !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
+  border: 1px solid #e2e8f0 !important;
+}
+:global(.mediconnect-popup .leaflet-popup-tip) {
+  background: white !important;
+}

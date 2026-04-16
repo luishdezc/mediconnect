@@ -1,0 +1,152 @@
+@use '../../styles/variables' as *;
+
+.wrap { display: flex; flex-direction: column; gap: sp(5); }
+
+.docBanner {
+  display: flex; align-items: center; gap: sp(3); padding: sp(4);
+  background: $primary-50; border-radius: $radius-md; border: 1px solid $primary-100;
+  flex-wrap: wrap;
+}
+.docAvatar {
+  width: 48px; height: 48px; border-radius: $radius-full; flex-shrink: 0;
+  background: $primary-200; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  img { width: 100%; height: 100%; object-fit: cover; }
+  span { font-size: 18px; font-weight: 700; color: $primary-700; }
+}
+.docMeta { flex: 1; min-width: 0;
+  strong { display: block; font-size: 15px; font-weight: 700; color: $gray-900; }
+  span   { display: block; font-size: 13px; color: $primary-700; }
+}
+.rate { color: $gray-600 !important; font-size: 12px !important; margin-top: 2px; }
+.activeDaysPills { display: flex; gap: sp(1); flex-wrap: wrap; }
+.dayPill {
+  font-size: 11px; font-weight: 700; padding: sp(1) sp(2); border-radius: $radius-full;
+  background: $gray-200; color: $gray-500;
+  &--on { background: $primary-100; color: $primary-700; }
+}
+.daysLoading, .noAvail { font-size: 12px; color: $gray-500; }
+
+.typeRow { display: flex; flex-direction: column; gap: sp(2); }
+.fieldLabel {
+  display: flex; align-items: center; gap: sp(2);
+  font-size: 13px; font-weight: 600; color: $gray-700;
+}
+.optional { font-weight: 400; color: $gray-400; font-size: 12px; }
+.typeSelector { display: grid; grid-template-columns: 1fr 1fr; gap: sp(3); }
+.typeBtn {
+  display: flex; align-items: center; justify-content: center; gap: sp(2);
+  padding: sp(3); border: 1.5px solid $gray-300; border-radius: $radius-md;
+  background: $white; color: $gray-700; font-size: 14px; font-weight: 500; cursor: pointer;
+  transition: all $transition-fast;
+  &:hover { border-color: $primary-400; }
+  &--active { border-color: $primary-600; background: $primary-50; color: $primary-700; font-weight: 700; }
+}
+
+.calSlotGrid {
+  display: grid; grid-template-columns: auto 1fr; gap: sp(5);
+  @media (max-width: 560px) { grid-template-columns: 1fr; }
+}
+
+.calendarWrap { display: flex; flex-direction: column; gap: sp(3); }
+.calHeader {
+  display: flex; align-items: center; justify-content: space-between; gap: sp(2);
+}
+.calTitle { font-size: 14px; font-weight: 700; color: $gray-900; text-transform: capitalize; }
+.navBtn {
+  width: 30px; height: 30px; border-radius: $radius-md; border: 1px solid $gray-200;
+  background: $white; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: $gray-600; transition: all $transition-fast;
+  &:hover { border-color: $primary-400; color: $primary-700; }
+}
+.calGrid { display: grid; grid-template-columns: repeat(7, 34px); gap: 3px; }
+.calDowHeader {
+  text-align: center; font-size: 11px; font-weight: 700; color: $gray-400;
+  text-transform: uppercase; padding: sp(1) 0; letter-spacing: 0.04em;
+}
+.calEmpty {}
+.calDay {
+  width: 34px; height: 34px; border-radius: $radius-md; border: 1.5px solid transparent;
+  font-size: 13px; font-weight: 500; cursor: pointer; transition: all $transition-fast;
+  display: flex; align-items: center; justify-content: center; background: $white;
+  &--available { color: $gray-900; border-color: $primary-200; background: $primary-50;
+    &:hover { background: $primary-100; border-color: $primary-400; } }
+  &--selected  { background: $primary-700 !important; color: $white !important; border-color: $primary-700 !important; font-weight: 700; }
+  &--today:not(&--selected) { border-color: $accent-400; color: $accent-500; font-weight: 700; }
+  &--past      { color: $gray-300; cursor: default; background: none; }
+  &--off       { color: $gray-400; cursor: default; background: none;
+    &:disabled { cursor: default; } }
+  &:disabled   { cursor: not-allowed; }
+}
+.calLegend { display: flex; gap: sp(3); flex-wrap: wrap;
+  span { display: flex; align-items: center; gap: sp(1); font-size: 11px; color: $gray-500; }
+}
+.legendDot {
+  width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0;
+  &[data-type='available'] { background: $primary-200; border: 1.5px solid $primary-400; }
+  &[data-type='off']       { background: $gray-200; }
+  &[data-type='selected']  { background: $primary-700; }
+}
+
+.slotsPanel {
+  display: flex; flex-direction: column; gap: sp(3);
+  border-left: 1px solid $gray-200; padding-left: sp(5);
+  @media (max-width: 560px) { border-left: none; padding-left: 0; border-top: 1px solid $gray-200; padding-top: sp(4); }
+}
+.noDateMsg, .noSlotsMsg, .slotsLoading {
+  display: flex; flex-direction: column; align-items: center; gap: sp(2);
+  padding: sp(6) 0; color: $gray-400; text-align: center;
+  p { font-size: 13px; color: $gray-500; max-width: 180px; }
+}
+.slotsLoading { flex-direction: row; padding: sp(4); gap: sp(3);
+  span { font-size: 13px; color: $gray-500; }
+}
+.spinnerSmall {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid $gray-300; border-top-color: $primary-600;
+  animation: spin 0.7s linear infinite; flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.slotsPanelHeader {
+  strong { display: block; font-size: 14px; font-weight: 700; color: $gray-900; text-transform: capitalize; }
+  span   { font-size: 12px; color: $gray-500; }
+}
+.slotsGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: sp(2);
+  @media (max-width: 400px) { grid-template-columns: repeat(2, 1fr); }
+}
+.slot {
+  padding: sp(2) 0; border: 1.5px solid $primary-200; border-radius: $radius-md;
+  background: $primary-50; color: $primary-700; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all $transition-fast; text-align: center; position: relative;
+  &:hover:not(:disabled) { background: $primary-100; border-color: $primary-500; transform: translateY(-1px); }
+  &--selected  { background: $primary-700; color: $white; border-color: $primary-700; }
+  &--taken     { background: $gray-100; color: $gray-400; cursor: not-allowed; border-color: $gray-200;
+    text-decoration: line-through; font-weight: 400; }
+  &:disabled   { cursor: not-allowed; }
+}
+.slotTakenDot {
+  position: absolute; top: 4px; right: 4px; width: 5px; height: 5px;
+  border-radius: 50%; background: $error-500; display: block;
+}
+
+.textarea {
+  width: 100%; padding: sp(3); border: 1.5px solid $gray-300; border-radius: $radius-md;
+  font-family: $font-body; font-size: 14px; color: $gray-900; resize: none;
+  &:focus { outline: none; border-color: $primary-500; box-shadow: 0 0 0 3px rgba(34,145,120,0.1); }
+  &::placeholder { color: $gray-400; }
+}
+.charCount { font-size: 11px; color: $gray-400; display: block; text-align: right; margin-top: sp(1); }
+
+.summary {
+  display: flex; align-items: flex-start; gap: sp(3); padding: sp(4);
+  background: $success-100; border: 1px solid #9ae6b4; border-radius: $radius-md;
+  font-size: 14px;
+  span:first-child { font-size: 20px; flex-shrink: 0; }
+  strong { display: block; color: $gray-900; font-weight: 700; margin-bottom: 2px; }
+  span:last-child { display: block; color: $gray-700; font-size: 13px; text-transform: capitalize; }
+}
+
+.actions {
+  display: flex; justify-content: flex-end; gap: sp(3);
+  padding-top: sp(3); border-top: 1px solid $gray-200;
+}
