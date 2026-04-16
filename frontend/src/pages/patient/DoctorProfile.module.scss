@@ -1,0 +1,114 @@
+@use '../../styles/variables' as *;
+
+.page { display: flex; flex-direction: column; gap: sp(5); animation: fadeInUp 0.4s ease; }
+
+.backBtn {
+  display: inline-flex; align-items: center; gap: sp(2); padding: sp(2) sp(4);
+  border: 1px solid $gray-200; border-radius: $radius-md; background: $white;
+  color: $gray-700; font-size: 14px; font-weight: 500; cursor: pointer;
+  transition: all $transition-fast; width: fit-content;
+  &:hover { border-color: $primary-400; color: $primary-700; }
+}
+
+.hero {
+  display: flex; align-items: flex-start; gap: sp(6); padding: sp(6);
+  flex-wrap: wrap;
+}
+.heroLeft { display: flex; align-items: flex-start; gap: sp(5); flex: 1; min-width: 0; }
+.avatar {
+  width: 88px; height: 88px; border-radius: $radius-full; flex-shrink: 0;
+  background: $primary-100; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  position: relative;
+  img { width: 100%; height: 100%; object-fit: cover; }
+  span { font-size: 32px; font-weight: 700; color: $primary-700; }
+}
+.verifiedBadge {
+  position: absolute; bottom: 0; right: 0;
+  width: 24px; height: 24px; border-radius: 50%; background: $primary-700; color: $white;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid $white;
+}
+
+.heroInfo { flex: 1; min-width: 0; }
+.nameRow { display: flex; align-items: center; gap: sp(3); flex-wrap: wrap; margin-bottom: sp(1); }
+.nameRow h1 { font-family: $font-display; font-size: 26px; color: $gray-900; }
+.featuredTag {
+  background: $accent-100; color: $accent-500; border: 1px solid $accent-300;
+  font-size: 12px; font-weight: 700; padding: sp(1) sp(3); border-radius: $radius-full;
+}
+.spec { font-size: 16px; color: $primary-700; font-weight: 600; margin-bottom: sp(3); }
+.metaRow { display: flex; flex-wrap: wrap; gap: sp(3); margin-bottom: sp(3);
+  span { display: flex; align-items: center; gap: sp(1); font-size: 13px; color: $gray-600;
+    svg { flex-shrink: 0; color: $gray-400; }
+  }
+}
+.ratingRow { display: flex; align-items: center; gap: sp(1); }
+.ratingNum   { font-size: 15px; font-weight: 700; color: $gray-900; margin-left: sp(1); }
+.ratingCount { font-size: 13px; color: $gray-500; }
+
+.heroActions {
+  display: flex; flex-direction: column; gap: sp(3); min-width: 220px;
+  @media (max-width: $bp-md) { width: 100%; min-width: unset; }
+}
+.price { font-size: 22px; font-weight: 800; color: $gray-900; text-align: center;
+  span { font-size: 13px; color: $gray-500; font-weight: 400; }
+}
+.modeTags { display: flex; gap: sp(3); justify-content: center;
+  span { display: flex; align-items: center; gap: sp(1); font-size: 12px; color: $gray-600;
+    background: $gray-100; padding: sp(1) sp(3); border-radius: $radius-full;
+  }
+}
+
+.grid { display: grid; grid-template-columns: 1fr 340px; gap: sp(5);
+  @media (max-width: $bp-lg) { grid-template-columns: 1fr; }
+}
+.leftCol, .rightCol { display: flex; flex-direction: column; gap: sp(4); }
+
+.cardTitle {
+  display: flex; align-items: center; gap: sp(2);
+  font-family: $font-display; font-size: 16px; color: $gray-900; margin-bottom: sp(4);
+  svg { color: $primary-600; flex-shrink: 0; }
+}
+.bio { font-size: 14px; color: $gray-700; line-height: 1.75; }
+
+.tagCloud { display: flex; flex-wrap: wrap; gap: sp(2); }
+.tag {
+  font-size: 13px; background: $primary-50; color: $primary-700; border: 1px solid $primary-100;
+  padding: sp(1) sp(3); border-radius: $radius-full; font-weight: 500;
+}
+
+.noSchedule { font-size: 14px; color: $gray-500; }
+.scheduleList { display: flex; flex-direction: column; gap: sp(2); }
+.scheduleRow {
+  display: flex; align-items: center; gap: sp(3); padding: sp(2) sp(3);
+  background: $gray-50; border-radius: $radius-md;
+}
+.scheduleDay  { font-size: 13px; font-weight: 800; color: $primary-700; min-width: 32px; }
+.scheduleTime { font-size: 13px; font-weight: 600; color: $gray-900; flex: 1; }
+.scheduleDur  { font-size: 11px; color: $gray-500; }
+
+.mapLink { text-decoration: none; display: block;
+  &:hover .mapPreview { border-color: $primary-400; background: $primary-50; }
+}
+.mapPreview {
+  display: flex; flex-direction: column; align-items: center; gap: sp(2); padding: sp(5);
+  border: 1.5px dashed $gray-300; border-radius: $radius-md; text-align: center;
+  font-size: 15px; font-weight: 600; color: $primary-700; transition: all $transition-fast;
+  span { font-size: 13px; color: $gray-500; font-weight: 400; }
+}
+
+.reviewsList { display: flex; flex-direction: column; gap: sp(4); }
+.reviewItem {
+  padding: sp(4); background: $gray-50; border-radius: $radius-md; border: 1px solid $gray-100;
+}
+.reviewHeader { display: flex; align-items: center; gap: sp(3); margin-bottom: sp(2); }
+.reviewAvatar {
+  width: 36px; height: 36px; border-radius: $radius-full; flex-shrink: 0;
+  background: $primary-100; color: $primary-700; font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.reviewMeta { flex: 1; min-width: 0;
+  strong { display: block; font-size: 14px; font-weight: 700; color: $gray-900; }
+}
+.reviewDate { font-size: 11px; color: $gray-400; flex-shrink: 0; }
+.reviewComment { font-size: 14px; color: $gray-700; line-height: 1.6; margin: 0; }
