@@ -15,7 +15,7 @@
 
 .donut { position: relative; width: 128px; height: 128px; flex-shrink: 0; }
 .donutSvg { width: 128px; height: 128px; }
-.donutRings { display: none; } /* SVG handles it inline */
+.donutRings { display: none; } 
 .donutTotal {
   font-family: $font-display; font-size: 20px; font-weight: 700; fill: $gray-900;
 }
