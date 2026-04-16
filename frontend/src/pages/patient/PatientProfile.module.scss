@@ -1,0 +1,18 @@
+@use '../../styles/variables' as *;
+
+.page { display: flex; flex-direction: column; gap: sp(5); animation: fadeInUp 0.4s ease; }
+.header {
+  h1 { font-family: $font-display; font-size: 28px; color: $gray-900; margin-bottom: sp(1); }
+  p  { color: $gray-600; font-size: 14px; }
+}
+.grid { display: flex; flex-direction: column; gap: sp(5); }
+.sectionTitle {
+  display: flex; align-items: center; gap: sp(2);
+  font-family: $font-display; font-size: 16px; color: $gray-900; margin-bottom: sp(5);
+  svg { color: $primary-600; }
+}
+.formGrid { display: grid; grid-template-columns: 1fr 1fr; gap: sp(4);
+  @media (max-width: $bp-sm) { grid-template-columns: 1fr; }
+}
+.fullCol { grid-column: 1 / -1; }
+.saveRow { display: flex; justify-content: flex-end; }

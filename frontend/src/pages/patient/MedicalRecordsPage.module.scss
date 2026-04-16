@@ -1,0 +1,55 @@
+@use '../../styles/variables' as *;
+
+.page { display: flex; flex-direction: column; gap: sp(5); animation: fadeInUp 0.4s ease; }
+.header {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: sp(4);
+  h1 { font-family: $font-display; font-size: 28px; color: $gray-900; margin-bottom: sp(1); }
+  p { color: $gray-600; font-size: 14px; }
+}
+.count { font-size: 13px; color: $gray-500; }
+.list { display: flex; flex-direction: column; gap: sp(3); }
+.empty { display: flex; flex-direction: column; align-items: center; gap: sp(3); padding: sp(12) 0; text-align: center;
+  svg { color: $gray-300; }
+  h3 { font-family: $font-display; font-size: 20px; color: $gray-700; }
+  p { font-size: 14px; color: $gray-500; }
+}
+
+.recHeader {
+  width: 100%; display: flex; align-items: center; gap: sp(4); padding: sp(4) sp(5);
+  border: none; background: none; cursor: pointer; text-align: left;
+  transition: background $transition-fast; border-radius: $radius-lg;
+  &:hover { background: $gray-50; }
+  svg:last-child { flex-shrink: 0; color: $gray-400; margin-left: auto; }
+}
+.recIcon {
+  width: 40px; height: 40px; border-radius: $radius-md; flex-shrink: 0;
+  background: $accent-100; color: $warning-500; display: flex; align-items: center; justify-content: center;
+}
+.recMeta { flex: 1; min-width: 0;
+  strong { display: block; font-size: 15px; color: $gray-900; font-weight: 700; @include truncate; }
+  span { display: block; font-size: 13px; color: $gray-500; }
+}
+.attachCount { font-size: 12px; color: $gray-500; flex-shrink: 0; }
+
+.recBody { padding: 0 sp(5) sp(5); border-top: 1px solid $gray-100; }
+.recGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: sp(4); padding-top: sp(4); }
+.recField {
+  label { font-size: 12px; font-weight: 700; color: $gray-500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: sp(1); display: block; }
+  p { font-size: 14px; color: $gray-800; line-height: 1.6; }
+}
+.prescription { background: $primary-50; padding: sp(3); border-radius: $radius-md; border-left: 3px solid $primary-400; font-family: monospace; font-size: 13px; }
+.tags { display: flex; flex-wrap: wrap; gap: sp(1); }
+.tag { background: $gray-100; color: $gray-700; font-size: 12px; padding: sp(1) sp(2); border-radius: $radius-full; }
+
+.attachments { margin-top: sp(4); padding-top: sp(4); border-top: 1px solid $gray-100;
+  label { font-size: 12px; font-weight: 700; color: $gray-500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: sp(2); display: block; }
+}
+.attachList { display: flex; flex-wrap: wrap; gap: sp(2); }
+.attachItem {
+  display: flex; align-items: center; gap: sp(2); padding: sp(2) sp(3);
+  background: $gray-100; border: 1px solid $gray-200; border-radius: $radius-md; text-decoration: none;
+  color: $gray-700; font-size: 13px; transition: all $transition-fast;
+  &:hover { background: $primary-50; border-color: $primary-300; color: $primary-700; }
+  svg { flex-shrink: 0; }
+}
+.attachSize { font-size: 11px; color: $gray-400; }
