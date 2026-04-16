@@ -1,0 +1,102 @@
+@use '../../styles/variables' as *;
+
+.page { display: flex; flex-direction: column; gap: sp(5); animation: fadeInUp 0.4s ease; }
+.header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: sp(4);
+  h1 { font-family: $font-display; font-size: 28px; color: $gray-900; margin-bottom: sp(1); }
+  p  { color: $gray-600; font-size: 14px; }
+}
+
+.prescribedAlert {
+  display: flex; align-items: flex-start; gap: sp(3); padding: sp(4) sp(5);
+  background: $primary-50; border: 1px solid $primary-200; border-radius: $radius-md; color: $primary-700;
+  svg { flex-shrink: 0; margin-top: 2px; }
+  strong { display: block; font-size: 14px; font-weight: 700; color: $gray-900; margin-bottom: sp(2); }
+}
+.prescribedTags { display: flex; flex-wrap: wrap; gap: sp(2); }
+.prescribedTag {
+  background: $white; border: 1px solid $primary-300; color: $primary-700;
+  font-size: 13px; font-weight: 600; padding: sp(1) sp(3); border-radius: $radius-full;
+  cursor: pointer; transition: all $transition-fast;
+  &:hover { background: $primary-700; color: $white; }
+}
+
+.section { display: flex; flex-direction: column; gap: sp(3); }
+.sectionHeader { display: flex; align-items: center; justify-content: space-between; }
+.sectionTitle { font-family: $font-display; font-size: 18px; color: $gray-900; }
+.sponsoredNote { font-size: 12px; color: $gray-400; }
+
+.medCard {
+  @include card; overflow: hidden; position: relative;
+  &--sponsored { border-color: $accent-300; box-shadow: 0 0 0 1px $accent-200, $shadow-card; }
+}
+.sponsoredBadge {
+  display: flex; align-items: center; gap: sp(1); padding: sp(1) sp(3);
+  background: $accent-100; color: $accent-500; font-size: 11px; font-weight: 700;
+  border-bottom: 1px solid $accent-200;
+}
+
+.medHeader {
+  width: 100%; display: flex; align-items: center; gap: sp(4); padding: sp(4) sp(5);
+  border: none; background: none; cursor: pointer; text-align: left;
+  transition: background $transition-fast; border-radius: $radius-lg;
+  &:hover { background: $gray-50; }
+  svg:last-child { flex-shrink: 0; color: $gray-400; }
+}
+.medIcon {
+  width: 44px; height: 44px; border-radius: $radius-md; background: $primary-50; color: $primary-700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.medInfo { flex: 1; min-width: 0;
+  strong { display: block; font-size: 15px; font-weight: 700; color: $gray-900; }
+}
+.medGeneric  { display: block; font-size: 12px; color: $gray-500; }
+.medCategory { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: $primary-600; margin-top: 2px; }
+
+.bestPrice { text-align: right; flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: flex-end;
+}
+.bestLabel  { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: $gray-400; }
+.bestAmount { font-family: $font-display; font-size: 22px; font-weight: 700; color: $success-500; line-height: 1; }
+.bestStore  { font-size: 11px; color: $gray-500; }
+
+.medBody { padding: 0 sp(5) sp(5); border-top: 1px solid $gray-100; }
+.medDesc { font-size: 14px; color: $gray-600; line-height: 1.6; margin: sp(4) 0; }
+
+.storesGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: sp(3); }
+.storeCard {
+  border: 1.5px solid $gray-200; border-radius: $radius-md; padding: sp(4);
+  display: flex; flex-direction: column; align-items: center; gap: sp(1);
+  text-align: center; position: relative; transition: all $transition-fast;
+  &:hover { border-color: $primary-300; transform: translateY(-2px); box-shadow: $shadow-sm; }
+  &--best { border-color: $success-500; background: $success-100; }
+}
+.bestTag { position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+  background: $success-500; color: $white; font-size: 10px; font-weight: 800;
+  padding: 2px 8px; border-radius: $radius-full; white-space: nowrap;
+}
+.storeLogo   { font-size: 24px; }
+.storeName   { font-size: 12px; font-weight: 700; color: $gray-800; }
+.storePrice  { font-family: $font-display; font-size: 20px; font-weight: 800; color: $gray-900;
+  span { font-size: 12px; font-weight: 400; color: $gray-500; }
+}
+.storeDelivery { font-size: 11px; color: $success-500; font-weight: 600; }
+.storeBtn {
+  display: flex; align-items: center; gap: sp(1); margin-top: sp(2);
+  background: $primary-700; color: $white; padding: sp(2) sp(3); border-radius: $radius-md;
+  font-size: 12px; font-weight: 700; text-decoration: none; transition: background $transition-fast;
+  &:hover { background: $primary-800; color: $white; }
+}
+
+.priceDisclaimer { font-size: 11px; color: $gray-400; margin-top: sp(4); font-style: italic; }
+
+.empty { display: flex; flex-direction: column; align-items: center; gap: sp(3); padding: sp(10) 0; text-align: center;
+  svg { color: $gray-300; }
+  h3 { font-family: $font-display; font-size: 18px; color: $gray-700; }
+  p  { font-size: 14px; color: $gray-500; }
+}
+
+.disclaimer {
+  padding: sp(4) sp(5); background: $gray-50; border: 1px solid $gray-200;
+  border-radius: $radius-md; font-size: 13px; color: $gray-600; line-height: 1.6;
+  strong { color: $gray-800; }
+}
