@@ -1,26 +1,45 @@
-@use '../../styles/variables' as *;
-
 .mapWrapper {
-  position: relative; width: 100%; height: 420px; border-radius: $radius-lg;
-  overflow: hidden; border: 1px solid $gray-200;
-  @media (max-width: $bp-md) { height: 300px; }
+  width: 100%;
+  height: 420px;
+  border-radius: 20px;
+  overflow: hidden;
 }
 
-.map { width: 100%; height: 100%; }
-
-.noLocation {
-  position: absolute; inset: 0; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: sp(2);
-  background: $gray-50; color: $gray-400;
-  span { font-size: 36px; }
-  p { font-size: 14px; }
+.map {
+  width: 100%;
+  height: 100%;
 }
 
-:global(.mediconnect-popup .leaflet-popup-content-wrapper) {
-  border-radius: 10px !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
-  border: 1px solid #e2e8f0 !important;
+.userMarker {
+  font-size: 24px;
 }
-:global(.mediconnect-popup .leaflet-popup-tip) {
-  background: white !important;
+
+.doctorMarker {
+  width: 36px;
+  height: 36px;
+  background: #10b981;
+  color: white;
+  font-weight: bold;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  span {
+    transform: rotate(45deg);
+  }
+}
+
+.top {
+  background: #f59e0b;
+}
+
+.selected {
+  background: #2563eb;
+  transform: scale(1.2) rotate(-45deg);
+}
+
+.popup {
+  font-family: sans-serif;
 }

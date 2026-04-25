@@ -1,152 +1,177 @@
-import React, { useEffect, useRef, useState } from 'react';
-import type { Doctor } from '../../types';
-import styles from './DoctorMap.module.scss';
+import { useEffect, useRef, useState } from "react";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import styles from "./DoctorMap.module.scss";
+
+interface Doctor {
+  _id: string;
+  userId?: { name?: string };
+  specialization?: string;
+  locationLat?: number;
+  locationLng?: number;
+  locationAddress?: string;
+}
 
 interface Props {
   doctors: Doctor[];
-  onSelect: (doctor: Doctor) => void;
   selectedId?: string;
-  userLat?: number;
-  userLng?: number;
+  onSelect: (doc: Doctor) => void;
 }
 
-const DoctorMap: React.FC<Props> = ({ doctors, onSelect, selectedId, userLat, userLng }) => {
-  const mapRef     = useRef<HTMLDivElement>(null);
-  const mapObj     = useRef<any>(null);
-  const markersRef = useRef<any[]>([]);
-  const LRef       = useRef<any>(null);
-  const [mapReady, setMapReady] = useState(false);
+const DoctorMap = ({ doctors, selectedId, onSelect }: Props) => {
+  const mapRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.LayerGroup | null>(null);
+  const userMarkerRef = useRef<L.Marker | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
 
   useEffect(() => {
-    if (!mapRef.current || mapObj.current) return; 
+    if (!containerRef.current || mapRef.current) return;
 
-    import('leaflet').then(L => {
-      LRef.current = L;
+    const map = L.map(containerRef.current).setView([20.67, -103.34], 13);
 
-      delete (L.Icon.Default.prototype as any)._getIconUrl;
-      L.Icon.Default.mergeOptions({
-        iconUrl:       'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        shadowUrl:     'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-      });
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap",
+    }).addTo(map);
 
-      const center: [number, number] = userLat && userLng
-        ? [userLat, userLng]
-        : [19.4326, -99.1332];
+    markersRef.current = L.layerGroup().addTo(map);
+    mapRef.current = map;
 
-      const map = L.map(mapRef.current!, {
-        center,
-        zoom: 12,
-        zoomControl: true,
-        scrollWheelZoom: true,
-      });
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 0);
+  }, []);
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>',
-        maxZoom: 19,
-      }).addTo(map);
-
-      mapObj.current = map;
-      setMapReady(true);
-    });
-
-    return () => {
-      if (mapObj.current) {
-        mapObj.current.remove();
-        mapObj.current = null;
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setUserLocation({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        });
+      },
+      () => {
+        console.warn("No se pudo obtener ubicación");
       }
-    };
-  }, []); 
+    );
+  }, []);
 
   useEffect(() => {
-    if (!mapReady || !mapObj.current || !LRef.current) return;
-    const L = LRef.current;
+    if (!mapRef.current || !userLocation) return;
 
-    markersRef.current.forEach(m => m.remove());
-    markersRef.current = [];
+    const map = mapRef.current;
 
-    if (userLat && userLng) {
-      const userIcon = L.divIcon({
-        html: `<div style="width:14px;height:14px;border-radius:50%;background:#1a6b5c;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3)"></div>`,
-        iconSize: [14, 14], iconAnchor: [7, 7], className: '',
-      });
-      const userMarker = L.marker([userLat, userLng], { icon: userIcon })
-        .addTo(mapObj.current)
-        .bindPopup('<strong>Tu ubicación</strong>');
-      markersRef.current.push(userMarker);
+    if (userMarkerRef.current) {
+      userMarkerRef.current.remove();
     }
 
-    const docMarkers: any[] = [];
-    doctors.forEach(doc => {
-      if (!doc.locationLat || !doc.locationLng) return;
-      const docUser = doc.userId as any;
+    const icon = L.divIcon({
+      html: `<div class="${styles.userMarker}">🏠</div>`,
+      className: "",
+    });
+
+    const marker = L.marker(
+      [userLocation.lat, userLocation.lng],
+      { icon }
+    ).addTo(map);
+
+    marker.bindPopup("Tu ubicación");
+
+    userMarkerRef.current = marker;
+
+    map.setView([userLocation.lat, userLocation.lng], 14);
+  }, [userLocation]);
+
+  const getDistance = (lat1:number, lon1:number, lat2:number, lon2:number) => {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI/180;
+    const dLon = (lon2 - lon1) * Math.PI/180;
+
+    const a =
+      Math.sin(dLat/2)**2 +
+      Math.cos(lat1*Math.PI/180) *
+      Math.cos(lat2*Math.PI/180) *
+      Math.sin(dLon/2)**2;
+
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  };
+
+  useEffect(() => {
+    if (!mapRef.current || !markersRef.current) return;
+
+    const layer = markersRef.current;
+    layer.clearLayers();
+
+    let processed = doctors
+      .filter(doc =>
+        doc.locationLat != null &&
+        doc.locationLng != null &&
+        !isNaN(doc.locationLat) &&
+        !isNaN(doc.locationLng)
+      )
+      .map(doc => {
+        if (!userLocation) return doc;
+
+        const distance = getDistance(
+          userLocation.lat,
+          userLocation.lng,
+          doc.locationLat!,
+          doc.locationLng!
+        );
+
+        return { ...doc, distance };
+      });
+
+    processed.sort((a:any, b:any) => (a.distance || 0) - (b.distance || 0));
+    const top3 = processed.slice(0, 3);
+
+    processed.forEach((doc:any) => {
+      const isTop = top3.some(d => d._id === doc._id);
       const isSelected = doc._id === selectedId;
 
-      const size = isSelected ? 44 : 36;
-      const bg   = isSelected ? '#0d3d2e' : '#1a6b5c';
       const icon = L.divIcon({
-        html: `<div style="background:${bg};color:white;border-radius:50% 50% 50% 0;width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;font-size:${isSelected?12:10}px;font-weight:700;border:3px solid white;box-shadow:0 3px 12px rgba(0,0,0,0.25);transform:rotate(-45deg)"><span style="transform:rotate(45deg)">${docUser?.name?.[0]?.toUpperCase() || '+'}</span></div>`,
-        iconSize: [size, size], iconAnchor: [size / 2, size], className: '',
+        html: `
+          <div class="${styles.doctorMarker} 
+            ${isTop ? styles.top : ""} 
+            ${isSelected ? styles.selected : ""}">
+            <span>${doc.userId?.name?.[0] || "D"}</span>
+          </div>
+        `,
+        className: "",
       });
 
-      let distStr = '';
-      if (userLat && userLng) {
-        const R = 6371;
-        const dLat = (doc.locationLat - userLat) * Math.PI / 180;
-        const dLng = (doc.locationLng - userLng) * Math.PI / 180;
-        const a = Math.sin(dLat/2)**2 + Math.cos(userLat*Math.PI/180)*Math.cos(doc.locationLat*Math.PI/180)*Math.sin(dLng/2)**2;
-        const distKm = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        distStr = distKm < 1
-          ? `📍 ${Math.round(distKm * 1000)} m de distancia`
-          : `📍 ${distKm.toFixed(1)} km de distancia`;
+      const marker = L.marker(
+        [doc.locationLat, doc.locationLng],
+        { icon }
+      )
+        .addTo(layer)
+        .bindPopup(`
+          <div class="${styles.popup}">
+            <h4>${doc.userId?.name || "Doctor"}</h4>
+            <p>${doc.specialization || ""}</p>
+            <p>${doc.locationAddress || ""}</p>
+            ${doc.distance ? `<p>${doc.distance.toFixed(1)} km</p>` : ""}
+          </div>
+        `)
+        .on("click", () => onSelect(doc));
+
+      if (isSelected && userLocation) {
+        mapRef.current!.flyTo(
+          [doc.locationLat, doc.locationLng],
+          15
+        );
+        marker.openPopup();
       }
-
-      const gmLink = userLat && userLng
-        ? `https://www.google.com/maps/dir/${userLat},${userLng}/${doc.locationLat},${doc.locationLng}`
-        : `https://www.google.com/maps/search/?api=1&query=${doc.locationLat},${doc.locationLng}`;
-
-      const popup = L.popup({ maxWidth: 240, className: 'mediconnect-popup' }).setContent(`
-        <div style="font-family:sans-serif;padding:4px 2px;line-height:1.5">
-          <strong style="font-size:14px;color:#1a202c">${docUser?.name}</strong><br/>
-          <span style="font-size:12px;color:#1a6b5c;font-weight:600">${doc.specialization}</span><br/>
-          ${doc.locationAddress ? `<span style="font-size:11px;color:#718096">📌 ${doc.locationAddress}</span><br/>` : ''}
-          ${doc.hourlyRate ? `<span style="font-size:12px;color:#2d3748">💰 $${doc.hourlyRate} MXN / consulta</span><br/>` : ''}
-          ${distStr ? `<span style="font-size:12px;color:#2b6cb0;font-weight:600">${distStr}</span><br/>` : ''}
-          <a href="${gmLink}" target="_blank" rel="noreferrer"
-            style="display:inline-block;margin-top:6px;background:#1a6b5c;color:white;padding:4px 10px;border-radius:6px;font-size:12px;text-decoration:none;font-weight:600">
-            🗺️ Cómo llegar
-          </a>
-        </div>
-      `);
-
-      const marker = L.marker([doc.locationLat, doc.locationLng], { icon })
-        .addTo(mapObj.current)
-        .bindPopup(popup)
-        .on('click', () => {
-          onSelect(doc);
-          marker.openPopup();
-        });
-
-      if (isSelected) marker.openPopup();
-      docMarkers.push(marker);
-      markersRef.current.push(marker);
     });
-
-    if (docMarkers.length > 0) {
-      const group = LRef.current.featureGroup(docMarkers);
-      mapObj.current.fitBounds(group.getBounds().pad(0.15), { maxZoom: 14 });
-    }
-  }, [mapReady, doctors, selectedId, userLat, userLng, onSelect]);
+  }, [doctors, selectedId, userLocation]);
 
   return (
     <div className={styles.mapWrapper}>
-      <div ref={mapRef} className={styles.map} />
-      {doctors.filter(d => d.locationLat).length === 0 && (
-        <div className={styles.noLocation}>
-          <span>🗺️</span>
-          <p>Ningún doctor tiene ubicación configurada</p>
-        </div>
-      )}
+      <div ref={containerRef} className={styles.map} />
     </div>
   );
 };
