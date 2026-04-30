@@ -1,0 +1,196 @@
+@use '../../styles/variables' as *;
+
+.page { display: flex; flex-direction: column; gap: sp(5); }
+
+/* ── Incoming call overlay ──────────────────────────────────────────────────── */
+.incomingOverlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+  z-index: 2000; display: flex; align-items: center; justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+.incomingCard {
+  background: #1a202c; color: $white; border-radius: $radius-xl; padding: sp(10) sp(12);
+  text-align: center; box-shadow: $shadow-xl; animation: slideUp 0.3s ease;
+  min-width: 300px;
+}
+.callerAvatar {
+  width: 80px; height: 80px; border-radius: $radius-full;
+  background: $primary-700; color: $white; font-size: 32px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; margin: 0 auto sp(4);
+  box-shadow: 0 0 0 4px rgba($primary-400, 0.3), 0 0 0 8px rgba($primary-400, 0.1);
+  animation: pulse 1.5s infinite;
+}
+.incomingCard h3 { font-family: $font-display; font-size: 22px; margin-bottom: sp(1); }
+.incomingCard p  { color: rgba(255,255,255,0.6); font-size: 14px; margin-bottom: sp(8); }
+.callActions { display: flex; justify-content: center; gap: sp(8); }
+.rejectBtn, .acceptBtn {
+  width: 60px; height: 60px; border-radius: $radius-full; border: none;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: transform $transition-fast;
+  &:hover { transform: scale(1.1); }
+}
+.rejectBtn { background: $error-500; color: $white; }
+.acceptBtn { background: $success-500; color: $white; }
+
+/* ── Active call container ──────────────────────────────────────────────────── */
+.callContainer {
+  position: relative; width: 100%; background: #0a0e1a;
+  border-radius: $radius-xl; overflow: hidden;
+  height: calc(100vh - 120px); min-height: 500px;
+  &--fullscreen { border-radius: 0; height: 100vh; }
+}
+
+.remoteVideo {
+  width: 100%; height: 100%; object-fit: cover;
+  background: #0d1117;
+}
+
+.localPip {
+  position: absolute; bottom: 100px; right: sp(5);
+  width: 180px; height: 120px; border-radius: $radius-lg; overflow: hidden;
+  border: 2px solid rgba(255,255,255,0.2); box-shadow: $shadow-lg;
+  z-index: 10; cursor: move;
+  @media (max-width: $bp-sm) { width: 120px; height: 80px; bottom: 90px; right: sp(3); }
+}
+.localVideo { width: 100%; height: 100%; object-fit: cover; }
+.camOffOverlay {
+  position: absolute; inset: 0; background: #1a202c;
+  display: flex; align-items: center; justify-content: center; color: $gray-500;
+}
+
+/* Top bar */
+.callTopBar {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: sp(4) sp(5);
+  background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
+}
+.callInfo { display: flex; align-items: center; gap: sp(3); color: $white; font-size: 14px; font-weight: 600; }
+.callDot { width: 8px; height: 8px; border-radius: 50%; background: $error-500; animation: pulse 1.5s infinite; }
+.callWith { color: rgba(255,255,255,0.7); font-weight: 400; }
+.iconBtn { background: rgba(255,255,255,0.15); border: none; color: $white; width: 36px; height: 36px;
+  border-radius: $radius-md; display: flex; align-items: center; justify-content: center; cursor: pointer;
+  &:hover { background: rgba(255,255,255,0.25); }
+}
+
+/* Controls bar */
+.controls {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: center; gap: sp(3);
+  padding: sp(5); background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
+  flex-wrap: wrap;
+}
+.ctrl {
+  display: flex; flex-direction: column; align-items: center; gap: sp(1);
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.1);
+  color: $white; border-radius: $radius-md; padding: sp(3) sp(4); cursor: pointer; min-width: 72px;
+  font-size: 11px; font-weight: 600; transition: all $transition-fast;
+  &:hover { background: rgba(255,255,255,0.25); }
+  &--off    { background: rgba($error-500, 0.3); border-color: rgba($error-500, 0.5); }
+  &--active { background: $primary-700; border-color: $primary-500; }
+}
+.endBtn {
+  display: flex; flex-direction: column; align-items: center; gap: sp(1);
+  background: $error-500; border: none; color: $white; border-radius: $radius-md;
+  padding: sp(3) sp(5); cursor: pointer; font-size: 11px; font-weight: 700; min-width: 80px;
+  transition: background $transition-fast;
+  &:hover { filter: brightness(0.85); }
+}
+
+/* In-call chat */
+.chatPanel {
+  position: absolute; right: 0; top: 0; bottom: 0; width: 280px; z-index: 15;
+  background: rgba(0,0,0,0.85); backdrop-filter: blur(12px);
+  display: flex; flex-direction: column; border-left: 1px solid rgba(255,255,255,0.1);
+  @media (max-width: $bp-sm) { width: 100%; }
+}
+.chatPanelHeader {
+  padding: sp(4) sp(5); border-bottom: 1px solid rgba(255,255,255,0.1);
+  color: $white; font-size: 14px; font-weight: 700; display: flex; justify-content: space-between;
+  button { background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; font-size: 16px; }
+}
+.chatMessages { flex: 1; overflow-y: auto; padding: sp(3) sp(4); display: flex; flex-direction: column; gap: sp(2); }
+.chatBubble {
+  display: flex; flex-direction: column; gap: 2px; max-width: 85%;
+  background: rgba(255,255,255,0.1); border-radius: $radius-md; padding: sp(2) sp(3);
+  color: $white; font-size: 13px; align-self: flex-start;
+  &--me { align-self: flex-end; background: rgba($primary-600, 0.6); }
+}
+.chatFrom  { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5); }
+.chatTime  { font-size: 10px; color: rgba(255,255,255,0.4); text-align: right; }
+.chatInput {
+  display: flex; padding: sp(3); border-top: 1px solid rgba(255,255,255,0.1); gap: sp(2);
+  input { flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: $radius-md;
+    color: $white; padding: sp(2) sp(3); font-size: 13px; outline: none;
+    &::placeholder { color: rgba(255,255,255,0.3); }
+  }
+  button { background: $primary-700; border: none; color: $white; width: 36px; height: 36px; border-radius: $radius-md;
+    cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center;
+  }
+}
+
+/* ── Idle page ───────────────────────────────────────────────────────────────── */
+.idlePage { display: flex; flex-direction: column; gap: sp(5); animation: fadeInUp 0.4s ease; }
+.idleHeader {
+  h1 { font-family: $font-display; font-size: 28px; color: $gray-900; margin-bottom: sp(1); }
+  p  { color: $gray-600; font-size: 14px; }
+}
+
+.previewSection { display: grid; grid-template-columns: 1fr 1fr; gap: sp(6);
+  @media (max-width: $bp-md) { grid-template-columns: 1fr; }
+}
+.previewVideo { position: relative; aspect-ratio: 16/9; background: #1a202c; border-radius: $radius-lg; overflow: hidden; }
+.previewVid   { width: 100%; height: 100%; object-fit: cover; }
+.previewOverlay {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.4);
+}
+.previewBtn {
+  display: flex; align-items: center; gap: sp(2); padding: sp(3) sp(5);
+  background: $primary-700; color: $white; border: none; border-radius: $radius-md;
+  font-size: 14px; font-weight: 600; cursor: pointer; transition: background $transition-fast;
+  &:hover { background: $primary-800; }
+}
+.previewInfo {
+  h3 { font-family: $font-display; font-size: 18px; color: $gray-900; margin-bottom: sp(4); }
+  ul { list-style: none; display: flex; flex-direction: column; gap: sp(3);
+    li { font-size: 14px; color: $gray-700; }
+  }
+}
+
+.apptListHeader {
+  display: flex; align-items: center; gap: sp(2); margin-bottom: sp(5);
+  h3 { font-family: $font-display; font-size: 16px; color: $gray-900; display: flex; align-items: center; gap: sp(2); }
+}
+.noAppts {
+  display: flex; flex-direction: column; align-items: center; gap: sp(3); padding: sp(8) 0; text-align: center;
+  svg { color: $gray-300; }
+  p { font-size: 14px; color: $gray-500; }
+}
+.apptList { display: flex; flex-direction: column; gap: sp(3); }
+.apptRow {
+  display: flex; align-items: center; gap: sp(4); padding: sp(3);
+  border: 1px solid $gray-200; border-radius: $radius-md; transition: border-color $transition-fast;
+  &:hover { border-color: $primary-300; }
+}
+.apptAvatar {
+  width: 44px; height: 44px; border-radius: $radius-full; flex-shrink: 0;
+  background: $primary-100; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  img { width: 100%; height: 100%; object-fit: cover; }
+  span { font-size: 16px; font-weight: 700; color: $primary-700; }
+}
+.apptMeta { flex: 1; min-width: 0;
+  strong { display: block; font-size: 15px; font-weight: 700; color: $gray-900; }
+  span   { display: block; font-size: 12px; color: $gray-500; text-transform: capitalize; }
+}
+.apptReason { font-style: italic; color: $gray-400 !important; }
+.callBtn {
+  display: flex; align-items: center; gap: sp(2); padding: sp(2) sp(4);
+  background: $primary-700; color: $white; border: none; border-radius: $radius-md;
+  font-size: 13px; font-weight: 700; cursor: pointer; flex-shrink: 0;
+  transition: background $transition-fast;
+  &:hover { background: $primary-800; }
+}
+
+@keyframes pulse { 0%,100% { opacity:1; box-shadow: 0 0 0 4px rgba($primary-400,0.3); } 50% { opacity:0.8; box-shadow: 0 0 0 8px rgba($primary-400,0.1); } }
+@keyframes slideUp { from { opacity:0; transform: translateY(20px) scale(0.97); } to { opacity:1; transform: none; } }
