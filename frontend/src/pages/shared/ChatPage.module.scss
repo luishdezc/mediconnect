@@ -1,0 +1,194 @@
+@use '../../styles/variables' as *;
+
+.chatLayout {
+  display: flex;
+  height: calc(100vh - 48px);
+  background: $white;
+  border-radius: $radius-xl;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+  border: 1px solid $gray-200;
+  @media (max-width: #{$bp-md - 1px}) { height: calc(100vh - 80px); }
+}
+
+.convSidebar {
+  width: 300px; flex-shrink: 0; border-right: 1px solid $gray-200;
+  display: flex; flex-direction: column; background: $white;
+  @media (max-width: $bp-md) {
+    width: 100%; position: absolute; inset: 0; z-index: 2; border-right: none;
+    transition: transform $transition-base;
+    &--hidden { transform: translateX(-100%); }
+  }
+}
+
+.convHeader {
+  padding: sp(4) sp(5); border-bottom: 1px solid $gray-200;
+  h2 { font-family: $font-display; font-size: 18px; color: $gray-900; margin-bottom: sp(3); }
+}
+.convSearch {
+  display: flex; align-items: center; gap: sp(2); padding: 0 sp(3);
+  background: $gray-100; border-radius: $radius-md; height: 36px;
+  svg { color: $gray-400; flex-shrink: 0; }
+  input {
+    flex: 1; border: none; background: none; font-size: 13px; color: $gray-800; outline: none;
+    &::placeholder { color: $gray-400; }
+  }
+}
+
+.convList { flex: 1; overflow-y: auto; }
+.convSkeleton { height: 64px; margin: sp(2) sp(3); border-radius: $radius-md; }
+.noConvs {
+  display: flex; flex-direction: column; align-items: center; gap: sp(2);
+  padding: sp(8) sp(4); color: $gray-400; text-align: center;
+  p { font-size: 14px; font-weight: 600; color: $gray-600; }
+  span { font-size: 13px; color: $gray-400; line-height: 1.5; }
+}
+
+.convItem {
+  width: 100%; display: flex; align-items: center; gap: sp(3);
+  padding: sp(3) sp(4); border: none; background: none; cursor: pointer;
+  text-align: left; transition: background $transition-fast;
+  border-bottom: 1px solid $gray-100;
+  &:hover { background: $gray-50; }
+  &--active { background: $primary-50; }
+}
+.convAvatar {
+  width: 42px; height: 42px; border-radius: $radius-full; flex-shrink: 0;
+  background: $primary-200; display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  img { width: 100%; height: 100%; object-fit: cover; }
+  span { font-weight: 700; color: $primary-700; font-size: 15px; }
+}
+.convInfo { flex: 1; min-width: 0; }
+.convName { display: block; font-size: 14px; font-weight: 600; color: $gray-900; @include truncate; }
+.convLast { display: block; font-size: 12px; color: $gray-500; @include truncate; }
+.convTime { font-size: 11px; color: $gray-400; flex-shrink: 0; }
+.convPag { padding: sp(2) sp(3); border-top: 1px solid $gray-100; }
+
+.chatArea {
+  flex: 1; display: flex; flex-direction: column; min-width: 0;
+  @media (max-width: $bp-md) {
+    position: absolute; inset: 0; z-index: 3; background: $white;
+    transform: translateX(100%); transition: transform $transition-base;
+    &--visible { transform: translateX(0); }
+  }
+}
+
+.noChat {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: sp(3); color: $gray-400; text-align: center; padding: sp(8);
+  svg { opacity: 0.3; }
+  h3 { font-family: $font-display; font-size: 20px; color: $gray-700; }
+  p  { font-size: 14px; }
+}
+
+.chatHeader {
+  padding: sp(3) sp(5); border-bottom: 1px solid $gray-200;
+  display: flex; align-items: center; gap: sp(3);
+  strong { display: block; font-size: 15px; font-weight: 700; color: $gray-900; }
+  span   { font-size: 13px; color: $gray-500; }
+}
+.backBtn {
+  display: none;
+  @media (max-width: $bp-md) {
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: $radius-md; border: 1px solid $gray-200;
+    background: $white; cursor: pointer; color: $gray-700; flex-shrink: 0;
+  }
+}
+.chatAvatar {
+  width: 40px; height: 40px; border-radius: $radius-full; flex-shrink: 0;
+  background: $primary-100; display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  img { width: 100%; height: 100%; object-fit: cover; }
+  span { font-weight: 700; color: $primary-700; }
+}
+
+.loadMore {
+  text-align: center; padding: sp(3);
+  button {
+    font-size: 12px; color: $primary-600; background: none; border: none;
+    cursor: pointer; padding: sp(1) sp(3);
+    &:hover { text-decoration: underline; }
+    &:disabled { opacity: 0.5; cursor: default; }
+  }
+}
+
+.messages {
+  flex: 1; overflow-y: auto; padding: sp(4) sp(5);
+  display: flex; flex-direction: column; gap: sp(3);
+}
+.loadingMsgs, .emptyChat {
+  display: flex; align-items: center; justify-content: center;
+  gap: sp(3); flex: 1; flex-direction: column; color: $gray-400;
+  span { font-size: 28px; }
+  p   { font-size: 14px; color: $gray-500; }
+}
+.loadingMsgs { flex-direction: row; align-items: center; padding: sp(4); }
+.spinner {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid $gray-200; border-top-color: $primary-600;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.msgRow {
+  display: flex; align-items: flex-end; gap: sp(2);
+  &--me { flex-direction: row-reverse; }
+}
+.msgAvatar {
+  width: 30px; height: 30px; border-radius: $radius-full; flex-shrink: 0;
+  background: $gray-200; display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  img { width: 100%; height: 100%; object-fit: cover; }
+  span { font-size: 12px; font-weight: 700; color: $gray-600; }
+}
+.bubble {
+  max-width: 68%; padding: sp(3) sp(4); border-radius: $radius-lg; position: relative;
+  p { font-size: 14px; line-height: 1.55; word-break: break-word; margin: 0; }
+  &--them {
+    background: $gray-100; color: $gray-900;
+    border-bottom-left-radius: 4px;
+  }
+  &--me {
+    background: $primary-700; color: $white;
+    border-bottom-right-radius: 4px;
+  }
+}
+.msgTime {
+  display: block; font-size: 10px; margin-top: sp(1); opacity: 0.6; text-align: right;
+}
+
+.inputArea {
+  padding: sp(3) sp(4); border-top: 1px solid $gray-200;
+  display: flex; align-items: flex-end; gap: sp(3);
+}
+.msgInput {
+  flex: 1; padding: sp(3) sp(4); border: 1.5px solid $gray-300; border-radius: $radius-lg;
+  font-family: $font-body; font-size: 14px; color: $gray-900;
+  resize: none; max-height: 120px; overflow-y: auto; line-height: 1.5;
+  &:focus { outline: none; border-color: $primary-500; box-shadow: 0 0 0 3px rgba(34,145,120,0.1); }
+  &::placeholder { color: $gray-400; }
+  &:disabled { background: $gray-50; }
+}
+.sendBtn {
+  width: 42px; height: 42px; border-radius: $radius-full; border: none; flex-shrink: 0;
+  background: $primary-700; color: $white; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all $transition-fast;
+  &:hover:not(&--disabled) { background: $primary-800; transform: scale(1.05); }
+  &--disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+}
+
+.convHeaderTop { display: flex; align-items: center; justify-content: space-between; }
+.connDot {
+  width: 8px; height: 8px; border-radius: 50%; background: $gray-400; flex-shrink: 0;
+  &--on { background: $success-500; box-shadow: 0 0 0 2px rgba($success-500, 0.25); }
+}
+.offlineBanner {
+  margin-left: auto; font-size: 11px; color: $error-500; font-weight: 600;
+  background: $error-100; padding: sp(1) sp(2); border-radius: $radius-full;
+}
+
+.msgStatus { opacity: 0.6; font-size: 10px; }
+.bubble--temp { opacity: 0.75; }
