@@ -192,3 +192,33 @@
 
 .msgStatus { opacity: 0.6; font-size: 10px; }
 .bubble--temp { opacity: 0.75; }
+
+.bubble--me {
+  background: $primary-700;
+  color: $white;
+
+  p {
+    color: $white;
+  }
+
+  .msgTime {
+    color: rgba(255, 255, 255, 0.8); 
+    opacity: 1; 
+  }
+
+  .msgStatus {
+    color: $white; 
+    opacity: 1;
+  }
+}
+
+
+.dateSeparator {
+  align-self: center;
+  font-size: 12px;
+  color: $gray-500;
+  background: $gray-100;
+  padding: 4px 10px;
+  border-radius: 999px;
+  margin: 8px 0;
+}

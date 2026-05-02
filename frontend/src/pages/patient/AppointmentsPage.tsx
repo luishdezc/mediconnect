@@ -136,11 +136,6 @@ const AppointmentsPage: React.FC = () => {
                       <Link to={`/patient/chat?doctorId=${(appt.doctorId as any)?._id || appt.doctorId}`}>
                         <Button size="sm" variant="secondary" icon={<MessageSquare size={14} />}>Chat</Button>
                       </Link>
-                      {appt.type === 'video' && appt.status === 'confirmed' && (
-                        <Link to="/patient/video">
-                          <Button size="sm" icon={<Video size={14} />}>Videollamada</Button>
-                        </Link>
-                      )}
                       {appt.status === 'completed' && (
                         <Button
                           size="sm"

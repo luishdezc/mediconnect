@@ -20,6 +20,23 @@ const RegisterPage: React.FC = () => {
   const [role, setRole] = useState<'patient' | 'doctor'>('patient');
   const [loading, setLoading] = useState(false);
 
+  const MEDICAL_SPECIALTIES = [
+    'Medicina General',
+    'Cardiología',
+    'Dermatología',
+    'Pediatría',
+    'Ginecología',
+    'Neurología',
+    'Psiquiatría',
+    'Oftalmología',
+    'Traumatología',
+    'Endocrinología',
+    'Gastroenterología',
+    'Oncología',
+    'Urología',
+    'Neumología',
+  ];
+
   const { register, handleSubmit, watch, formState: { errors } } = useForm<RegisterForm>();
   const password = watch('password');
 
@@ -41,8 +58,9 @@ const RegisterPage: React.FC = () => {
     <div className={styles.page}>
       <div className={styles.left}>
         <div className={styles.brand}>
-          <span className={styles.brandIcon}>🏥</span>
-          <span className={styles.brandName}>MediConnect</span>
+          <span className={styles.brandName}>
+            Medi<span>Connect</span>
+          </span>
         </div>
         <div className={styles.hero}>
           <h1>Únete a la<br />plataforma.</h1>
@@ -66,7 +84,7 @@ const RegisterPage: React.FC = () => {
           <div className={styles.roleSelector}>
             <label>¿Cómo deseas registrarte?</label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              {([['patient', '🧑‍⚕️', 'Paciente'], ['doctor', '👨‍⚕️', 'Doctor']] as const).map(([r, icon, label]) => (
+              {([['patient', '🙍‍♂️', 'Paciente'], ['doctor', '👨‍⚕️', 'Doctor']] as const).map(([r, icon, label]) => (
                 <div
                   key={r}
                   className={[styles.roleCard, role === r ? styles['roleCard--active'] : ''].join(' ')}
@@ -84,7 +102,7 @@ const RegisterPage: React.FC = () => {
           <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
             <Input
               label="Nombre completo"
-              placeholder="Dr. Juan Pérez"
+              placeholder={role === 'doctor' ? 'Dr. Juan Pérez' : 'Juan Pérez'}
               icon={<User size={16} />}
               error={errors.name?.message}
               {...register('name', { required: 'El nombre es requerido', minLength: { value: 3, message: 'Mínimo 3 caracteres' } })}
@@ -127,15 +145,35 @@ const RegisterPage: React.FC = () => {
             {role === 'doctor' && (
               <div className={styles.doctorExtra}>
                 <p style={{ fontSize: '13px', color: '#1a6b5c', fontWeight: 600, marginBottom: 0 }}>
-                  📋 Información profesional — el admin verificará tu cédula antes de aprobar tu cuenta.
+                  Información profesional. El admin verificará tu cédula antes de aprobar tu cuenta.
                 </p>
-                <Input
-                  label="Especialidad"
-                  placeholder="Ej. Cardiología, Pediatría…"
-                  icon={<Stethoscope size={16} />}
-                  error={errors.specialization?.message}
-                  {...register('specialization', role === 'doctor' ? { required: 'La especialidad es requerida' } : {})}
-                />
+                <div className={styles.selectWrapper}>
+                  <label className={styles.label}>Especialidad</label>
+
+                  <div className={styles.selectContainer}>
+                    <Stethoscope size={16} className={styles.inputIcon} />
+
+                    <select
+                      className={styles.select}
+                      defaultValue=""
+                      {...register('specialization', role === 'doctor' ? { required: 'La especialidad es requerida' } : {})}
+                    >
+                      <option value="" disabled>
+                        Selecciona una especialidad
+                      </option>
+
+                      {MEDICAL_SPECIALTIES.map((spec) => (
+                        <option key={spec} value={spec}>
+                          {spec}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                    
+                  {errors.specialization && (
+                    <span className={styles.error}>{errors.specialization.message}</span>
+                  )}
+                </div>
                 <Input
                   label="Cédula profesional"
                   placeholder="Número de cédula"

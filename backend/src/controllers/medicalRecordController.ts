@@ -21,7 +21,7 @@ const PAGE_SIZE = 10;
 export const createRecord = async (req: Request, res: Response): Promise<void> => {
   try {
     const user = req.user as IUser;
-    const { appointmentId, diagnosis, symptoms, treatment, prescription, notes, followUpDate } = req.body;
+    const { appointmentId, diagnosis, symptoms, treatment, prescription, medications, notes, followUpDate } = req.body;
 
     const doctor = await Doctor.findOne({ userId: user._id });
     if (!doctor) { res.status(403).json({ message: 'Solo doctores pueden crear registros' }); return; }
@@ -41,6 +41,23 @@ export const createRecord = async (req: Request, res: Response): Promise<void> =
       uploadedAt: new Date(),
     }));
 
+    let parsedMeds: any[] = [];
+    if (medications) {
+      try {
+        parsedMeds = typeof medications === 'string' ? JSON.parse(medications) : medications;
+        parsedMeds = parsedMeds.map((m: any) => ({
+          name:           String(m.name),
+          doseLabel:      String(m.doseLabel),
+          pillsPerDay:    Number(m.pillsPerDay),
+          frequencyHours: Number(m.frequencyHours),
+          durationDays:   Number(m.durationDays),
+          startDate:      new Date(),
+        }));
+      } catch {
+        parsedMeds = [];
+      }
+    }
+
     const record = await MedicalRecord.create({
       appointmentId,
       patientId: appointment.patientId,
@@ -49,6 +66,7 @@ export const createRecord = async (req: Request, res: Response): Promise<void> =
       symptoms: symptoms ? JSON.parse(symptoms) : [],
       treatment,
       prescription,
+      medications: parsedMeds,
       notes,
       followUpDate,
       fileAttachments,

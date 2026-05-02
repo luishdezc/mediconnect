@@ -10,7 +10,6 @@ const Spinner: React.FC<Props> = ({ size = 'md', label }) => {
   if (size === 'full') {
     return (
       <div className={styles.fullPage}>
-        <div className={styles.logo}>🏥</div>
         <div className={styles.spinner} data-size="lg"/>
         {label && <p className={styles.label}>{label}</p>}
       </div>

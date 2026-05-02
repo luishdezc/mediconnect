@@ -198,10 +198,10 @@ const SettingsPage: React.FC = () => {
 
                 <div className={styles.roleInfo}>
                   <span className={styles.rolePill} data-role={user?.role}>
-                    {user?.role === 'patient' ? '🧑‍⚕️ Paciente' : user?.role === 'doctor' ? '👨‍⚕️ Doctor' : '🛡️ Admin'}
+                    {user?.role === 'patient' ? 'Paciente' : user?.role === 'doctor' ? 'Doctor' : 'Admin'}
                   </span>
                   <span className={styles.authPill}>
-                    {user?.authType === 'google' ? '🔵 Google' : '🔒 Cuenta local'}
+                    {user?.authType === 'google' ? 'Google' : 'Cuenta local'}
                   </span>
                 </div>
 

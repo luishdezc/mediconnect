@@ -38,6 +38,23 @@ const ChatPage: React.FC = () => {
 
   useEffect(() => { activeConvRef.current = activeConv; }, [activeConv]);
 
+  const formatDay = (dateStr: string) => {
+    const date = parseISO(dateStr);
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    if (format(date, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd')) {
+      return 'Hoy';
+    }
+
+    if (format(date, 'yyyy-MM-dd') === format(yesterday, 'yyyy-MM-dd')) {
+      return 'Ayer';
+    }
+
+    return format(date, "d MMM yyyy", { locale: es });
+  };
+
   const openOrCreate = useCallback(async (targetId: string, role: 'doctorId' | 'patientId') => {
     try {
       const body = role === 'doctorId' ? { doctorId: targetId } : { patientId: targetId };
@@ -216,6 +233,7 @@ const ChatPage: React.FC = () => {
     <DashboardLayout>
       <div className={styles.chatLayout}>
 
+        {/* ── Conversations sidebar ───────────────────────────── */}
         <div className={[styles.convSidebar, mobileShowChat ? styles['convSidebar--hidden'] : ''].join(' ')}>
           <div className={styles.convHeader}>
             <div className={styles.convHeaderTop}>
@@ -288,6 +306,7 @@ const ChatPage: React.FC = () => {
           )}
         </div>
 
+        {/* ── Chat area ────────────────────────────────────────── */}
         <div className={[styles.chatArea, mobileShowChat ? styles['chatArea--visible'] : ''].join(' ')}>
           {!activeConv ? (
             <div className={styles.noChat}>
@@ -297,6 +316,7 @@ const ChatPage: React.FC = () => {
             </div>
           ) : (
             <>
+              {/* Header */}
               <div className={styles.chatHeader}>
                 <button className={styles.backBtn} onClick={() => setMobileShowChat(false)}>
                   <ArrowLeft size={18} />
@@ -316,6 +336,7 @@ const ChatPage: React.FC = () => {
                 )}
               </div>
 
+              {/* Load older */}
               {msgPagination?.hasPrev && (
                 <div className={styles.loadMore}>
                   <button onClick={() => setMsgPage(p => p + 1)} disabled={loadingMsgs}>
@@ -324,6 +345,7 @@ const ChatPage: React.FC = () => {
                 </div>
               )}
 
+              {/* Messages */}
               <div className={styles.messages}>
                 {loadingMsgs && msgPage === 1 ? (
                   <div className={styles.loadingMsgs}>
@@ -336,44 +358,69 @@ const ChatPage: React.FC = () => {
                     <p>Sé el primero en escribir</p>
                   </div>
                 ) : (
-                  messages.map(msg => {
+                  messages.map((msg, index) => {
                     const senderId  = (msg.senderId as any)?._id || msg.senderId;
                     const isMe      = senderId === user?._id;
                     const isTemp    = msg._id.startsWith('temp-');
                     const senderUser = msg.senderId as any;
+
+                    const prevMsg = messages[index - 1];
+
+                    const showDateSeparator =
+                      !prevMsg ||
+                      format(parseISO(prevMsg.createdAt), 'yyyy-MM-dd') !==
+                      format(parseISO(msg.createdAt), 'yyyy-MM-dd');
+                    
                     return (
-                      <div
-                        key={msg._id}
-                        className={[styles.msgRow, isMe ? styles['msgRow--me'] : ''].join(' ')}
-                      >
-                        {!isMe && (
-                          <div className={styles.msgAvatar}>
-                            {resolveAvatar(senderUser?.avatar)
-                              ? <img src={resolveAvatar(senderUser?.avatar)} alt="" />
-                              : <span>{senderUser?.name?.[0]}</span>
-                            }
+                      <React.Fragment key={msg._id}>
+
+                        {/* 🟡 SEPARADOR */}
+                        {showDateSeparator && (
+                          <div className={styles.dateSeparator}>
+                            {formatDay(msg.createdAt)}
                           </div>
                         )}
-                        <div className={[
-                          styles.bubble,
-                          isMe   ? styles['bubble--me']   : styles['bubble--them'],
-                          isTemp ? styles['bubble--temp'] : '',
-                        ].filter(Boolean).join(' ')}>
-                          <p>{msg.content}</p>
-                          <span className={styles.msgTime}>
-                            {format(parseISO(msg.createdAt), 'HH:mm')}
-                            {isMe && (
-                              <span className={styles.msgStatus}>{isTemp ? ' ⏳' : ' ✓'}</span>
-                            )}
-                          </span>
+
+                        <div
+                          className={[
+                            styles.msgRow,
+                            isMe ? styles['msgRow--me'] : ''
+                          ].join(' ')}
+                        >
+                          {!isMe && (
+                            <div className={styles.msgAvatar}>
+                              {resolveAvatar(senderUser?.avatar)
+                                ? <img src={resolveAvatar(senderUser?.avatar)} alt="" />
+                                : <span>{senderUser?.name?.[0]}</span>
+                              }
+                            </div>
+                          )}
+                        
+                          <div className={[
+                            styles.bubble,
+                            isMe   ? styles['bubble--me']   : styles['bubble--them'],
+                            isTemp ? styles['bubble--temp'] : '',
+                          ].filter(Boolean).join(' ')}>
+                            <p>{msg.content}</p>
+                        
+                            <span className={styles.msgTime}>
+                              {format(parseISO(msg.createdAt), 'HH:mm')}
+                              {isMe && (
+                                <span className={styles.msgStatus}>
+                                  {isTemp ? ' ⏳' : ' ✓'}
+                                </span>
+                              )}
+                            </span>
+                          </div>
                         </div>
-                      </div>
+                      </React.Fragment>
                     );
                   })
                 )}
                 <div ref={bottomRef} />
               </div>
 
+              {/* Input */}
               <div className={styles.inputArea}>
                 <textarea
                   ref={inputRef}

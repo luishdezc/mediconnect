@@ -64,7 +64,7 @@ const DoctorSchema = new Schema<IDoctor>(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
     specialization: { type: String, required: true, trim: true },
-    licenseNumber: { type: String, required: true, unique: true },
+    licenseNumber: { type: String, required: true, unique: true, sparse: true },
     isVerified: { type: Boolean, default: false },
     isApproved: { type: Boolean, default: false },
     locationLat: { type: Number },
@@ -86,7 +86,7 @@ const DoctorSchema = new Schema<IDoctor>(
   { timestamps: true }
 );
 
-DoctorSchema.index({ specialization: 'text' });
+DoctorSchema.index({ specialization: 'text', locationAddress: 'text' });
 DoctorSchema.index({ locationLat: 1, locationLng: 1 });
 DoctorSchema.index({ isApproved: 1, isSubscribed: 1 });
 

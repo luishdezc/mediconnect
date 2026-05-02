@@ -1,24 +1,62 @@
 @use '../../styles/variables' as *;
 
 .spinner {
-  border-radius: 50%; border-style: solid; border-color: $gray-200;
-  border-top-color: $primary-600; animation: spin 0.7s linear infinite;
-  flex-shrink: 0;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  background: conic-gradient(
+    from 0deg,
+    $primary-500,
+    $primary-600,
+    transparent 70%
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 0);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 0);
 
-  &[data-size='sm'] { width: 16px; height: 16px; border-width: 2px; }
-  &[data-size='md'] { width: 24px; height: 24px; border-width: 2.5px; }
-  &[data-size='lg'] { width: 40px; height: 40px; border-width: 4px; }
+  animation: spin 0.8s linear infinite;
+  filter: drop-shadow(0 0 6px rgba($primary-500, 0.4));
+
+  &[data-size='sm'] { width: 16px; height: 16px; }
+  &[data-size='md'] { width: 26px; height: 26px; }
+  &[data-size='lg'] { width: 44px; height: 44px; }
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 
 .fullPage {
-  min-height: 100vh; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: sp(4);
-  background: $gray-100;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: sp(4);
+
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(6px);
 }
 .logo { font-size: 48px; animation: pulse 2s ease-in-out infinite; }
 @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
 
 .inline { display: inline-flex; align-items: center; gap: sp(2); }
 
-.label { font-size: 14px; color: $gray-600; }
+.label {
+  font-size: 14px;
+  color: $gray-500;
+  letter-spacing: 0.3px;
+  animation: fade 1.2s ease-in-out infinite;
+}
+
+@keyframes fade {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.spinner::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: $primary-600;
+  opacity: 0.15;
+}

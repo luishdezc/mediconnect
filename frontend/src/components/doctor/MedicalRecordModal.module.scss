@@ -2,71 +2,164 @@
 
 .wrap { display: flex; flex-direction: column; gap: sp(5); }
 
+/* Patient banner */
 .patBanner {
-  display: flex; align-items: center; gap: sp(3); padding: sp(4);
-  background: $primary-50; border-radius: $radius-md; border: 1px solid $primary-100;
-  strong { display: block; font-size: 15px; color: $gray-900; font-weight: 700; }
-  span { display: block; font-size: 13px; color: $gray-600; }
+  display: flex; align-items: center; gap: sp(3);
+  padding: sp(3) sp(4); background: $primary-50; border-radius: $radius-md; border: 1px solid $primary-100;
+  strong { display: block; font-size: 14px; font-weight: 700; color: $gray-900; }
+  span   { font-size: 12px; color: $gray-500; }
 }
 .patAvatar {
-  width: 44px; height: 44px; border-radius: $radius-full; flex-shrink: 0;
+  width: 42px; height: 42px; border-radius: $radius-full; flex-shrink: 0;
   background: $primary-200; display: flex; align-items: center; justify-content: center; overflow: hidden;
-  img { width: 100%; height: 100%; object-fit: cover; }
-  span { font-size: 16px; font-weight: 700; color: $primary-700; }
+  img  { width: 100%; height: 100%; object-fit: cover; }
+  span { font-size: 18px; font-weight: 700; color: $primary-700; }
 }
-.dateTag {
-  margin-left: auto; background: $white; border: 1px solid $primary-200;
-  color: $primary-700; font-size: 12px; font-weight: 600;
-  padding: sp(1) sp(3); border-radius: $radius-full; white-space: nowrap; flex-shrink: 0;
-}
+.dateTag { margin-left: auto; font-size: 12px; color: $primary-700; font-weight: 600; white-space: nowrap; }
 
+/* Grid */
 .grid { display: grid; grid-template-columns: 1fr 1fr; gap: sp(4);
-  @media (max-width: $bp-md) { grid-template-columns: 1fr; }
+  @media (max-width: $bp-sm) { grid-template-columns: 1fr; }
 }
 .fullCol { grid-column: 1 / -1; }
 
-.fieldLabel { font-size: 13px; font-weight: 600; color: $gray-700; margin-bottom: sp(2); display: block; }
+/* Field label */
+.fieldLabel { font-size: 13px; font-weight: 600; color: $gray-700; display: block; margin-bottom: sp(2); }
 
+/* Symptoms */
 .symptomRow { display: flex; gap: sp(2); }
 .symptomInput {
-  flex: 1; height: 42px; padding: 0 sp(3); border: 1.5px solid $gray-300; border-radius: $radius-md;
+  flex: 1; height: 38px; padding: 0 sp(3); border: 1.5px solid $gray-300; border-radius: $radius-md;
   font-family: $font-body; font-size: 14px; color: $gray-900; outline: none;
   &:focus { border-color: $primary-500; box-shadow: 0 0 0 3px rgba(34,145,120,0.1); }
-  &::placeholder { color: $gray-400; }
 }
 .addBtn {
-  width: 42px; height: 42px; border-radius: $radius-md; border: none;
-  background: $primary-700; color: $white; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; transition: background $transition-fast;
-  &:hover { background: $primary-800; }
+  width: 38px; height: 38px; border-radius: $radius-md; border: 1.5px solid $primary-400;
+  background: $primary-50; color: $primary-700; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  &:hover { background: $primary-700; color: $white; }
 }
 .tags { display: flex; flex-wrap: wrap; gap: sp(2); margin-top: sp(2); }
 .tag {
-  display: flex; align-items: center; gap: sp(1); padding: sp(1) sp(3);
+  display: flex; align-items: center; gap: sp(1); padding: sp(1) sp(2);
   background: $primary-50; border: 1px solid $primary-200; border-radius: $radius-full;
-  color: $primary-700; font-size: 13px; font-weight: 500;
-  button { background: none; border: none; cursor: pointer; display: flex; align-items: center; color: $primary-600; padding: 0; &:hover { color: $error-500; } }
+  font-size: 12px; font-weight: 600; color: $primary-700;
+  button { background: none; border: none; cursor: pointer; color: $primary-500; display: flex; padding: 0; }
 }
 
-.uploadSection { display: flex; flex-direction: column; gap: sp(3); }
+/* ── Medications section ─────────────────────────────────────────────────── */
+.medsSection {
+  border: 1.5px solid $gray-200; border-radius: $radius-md; overflow: visible;
+}
+.medsSectionHeader {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: sp(3) sp(4); background: $gray-50; border-bottom: 1.5px solid $gray-200;
+}
+.medsEmpty {
+  display: flex; align-items: center; gap: sp(2); padding: sp(4);
+  color: $gray-400; font-size: 13px; svg { flex-shrink: 0; }
+}
+
+/* Picker panel */
+.picker {
+  border-bottom: 1px solid $gray-200; background: $white;
+  max-height: 380px; display: flex; flex-direction: column;
+}
+.pickerSearch {
+  display: flex; align-items: center; gap: sp(2); padding: sp(3) sp(4);
+  border-bottom: 1px solid $gray-100;
+  svg { color: $gray-400; flex-shrink: 0; }
+  input {
+    flex: 1; border: none; outline: none; font-size: 14px; color: $gray-800;
+    &::placeholder { color: $gray-400; }
+  }
+}
+.pickerClose { background: none; border: none; cursor: pointer; color: $gray-400; display: flex; padding: 2px; &:hover { color: $gray-700; } }
+
+.pickerCats {
+  display: flex; gap: sp(1); padding: sp(2) sp(4); overflow-x: auto; border-bottom: 1px solid $gray-100; flex-shrink: 0;
+  scrollbar-width: none; &::-webkit-scrollbar { display: none; }
+}
+.catChip {
+  padding: sp(1) sp(3); border-radius: $radius-full; border: 1.5px solid $gray-200;
+  font-size: 12px; font-weight: 600; color: $gray-600; background: $white;
+  cursor: pointer; white-space: nowrap; transition: all $transition-fast; flex-shrink: 0;
+  &:hover { border-color: $primary-400; }
+  &--on { background: $primary-700; border-color: $primary-700; color: $white; }
+}
+.pickerList { flex: 1; overflow-y: auto; }
+.pickerEmpty { text-align: center; color: $gray-400; font-size: 14px; padding: sp(6); }
+.pickerItem {
+  width: 100%; display: flex; align-items: center; gap: sp(3); padding: sp(3) sp(4);
+  border: none; background: $white; cursor: pointer; text-align: left;
+  border-bottom: 1px solid $gray-100; transition: background $transition-fast;
+  &:hover:not(:disabled) { background: $primary-50; }
+  &--added { opacity: 0.55; cursor: default; }
+}
+.pickerItemInfo { flex: 1; min-width: 0; }
+.pickerName    { display: block; font-size: 14px; font-weight: 700; color: $gray-900; }
+.pickerGeneric { display: block; font-size: 11px; color: $gray-500; margin-top: 1px; }
+.addedBadge    { font-size: 12px; font-weight: 700; color: $success-500; flex-shrink: 0; }
+.pickerPlus    { color: $primary-600; flex-shrink: 0; }
+
+/* Selected medication rows */
+.medRow {
+  border-top: 1px solid $gray-100; padding: sp(4);
+  &:last-child { border-bottom: none; }
+}
+.medRowHeader {
+  display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: sp(3);
+  strong { display: block; font-size: 14px; font-weight: 700; color: $gray-900; }
+}
+.medDoseLabel {
+  display: inline-block; margin-top: 2px; font-size: 11px; font-weight: 700;
+  color: $primary-700; background: $primary-50; border: 1px solid $primary-200;
+  padding: 1px sp(2); border-radius: $radius-full;
+}
+.medRemove {
+  width: 28px; height: 28px; border-radius: $radius-md; border: 1px solid $error-300;
+  background: $error-100; color: $error-500; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all $transition-fast;
+  &:hover { background: $error-500; color: $white; }
+}
+.medFields {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: sp(3); align-items: end;
+  @media (max-width: $bp-sm) { grid-template-columns: 1fr 1fr; }
+}
+.medField {
+  display: flex; flex-direction: column; gap: sp(1);
+  label { font-size: 11px; font-weight: 700; color: $gray-500; text-transform: uppercase; letter-spacing: 0.04em; }
+}
+.medNumInput {
+  height: 36px; border: 1.5px solid $gray-300; border-radius: $radius-md; font-size: 14px; font-weight: 700;
+  color: $primary-700; padding: 0 sp(2); text-align: center; outline: none;
+  &:focus { border-color: $primary-500; box-shadow: 0 0 0 3px rgba(34,145,120,0.1); }
+}
+.medSelect {
+  height: 36px; border: 1.5px solid $gray-300; border-radius: $radius-md; font-size: 13px;
+  color: $gray-800; background: $white; padding: 0 sp(2); outline: none;
+  &:focus { border-color: $primary-500; }
+}
+.medSummary {
+  grid-column: 1 / -1; font-size: 12px; color: $gray-500; background: $gray-50;
+  padding: sp(2) sp(3); border-radius: $radius-sm; border: 1px solid $gray-200;
+}
+
+.uploadSection { display: flex; flex-direction: column; gap: sp(2); }
 .uploadZone {
-  display: flex; flex-direction: column; align-items: center; gap: sp(2); padding: sp(6);
-  border: 2px dashed $gray-300; border-radius: $radius-lg; cursor: pointer; text-align: center;
-  transition: all $transition-fast; color: $gray-500;
+  display: flex; flex-direction: column; align-items: center; gap: sp(2);
+  padding: sp(5); border: 2px dashed $gray-300; border-radius: $radius-md;
+  cursor: pointer; color: $gray-500; text-align: center; transition: all $transition-fast;
   &:hover { border-color: $primary-400; background: $primary-50; color: $primary-700; }
-  svg { color: $gray-400; }
-  span { font-size: 14px; font-weight: 500; }
+  span { font-size: 14px; }
 }
-.uploadHint { font-size: 12px; color: $gray-400; font-weight: 400 !important; }
-
+.uploadHint { font-size: 12px; color: $gray-400; }
 .fileList { display: flex; flex-direction: column; gap: sp(2); }
 .fileItem {
-  display: flex; align-items: center; gap: sp(3); padding: sp(2) sp(3);
-  background: $gray-50; border: 1px solid $gray-200; border-radius: $radius-md;
-  font-size: 13px; color: $gray-700;
-  span:first-child { flex: 1; @include truncate; }
-  button { background: none; border: none; cursor: pointer; color: $gray-400; display: flex; align-items: center; &:hover { color: $error-500; } }
+  display: flex; align-items: center; gap: sp(2); padding: sp(2) sp(3);
+  background: $gray-50; border-radius: $radius-sm; border: 1px solid $gray-200;
+  span { font-size: 13px; color: $gray-700; flex: 1; }
+  button { background: none; border: none; cursor: pointer; color: $gray-400; &:hover { color: $error-500; } }
 }
-.fileSize { font-size: 11px; color: $gray-400; flex-shrink: 0; }
+.fileSize { font-size: 11px; color: $gray-400; }
 
-.footer { display: flex; justify-content: flex-end; gap: sp(3); padding-top: sp(3); border-top: 1px solid $gray-200; }
+.footer { display: flex; justify-content: flex-end; gap: sp(3); padding-top: sp(4); border-top: 1px solid $gray-100; }
