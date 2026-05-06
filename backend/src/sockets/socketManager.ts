@@ -51,14 +51,17 @@ export const initSocket = (server: HTTPServer): SocketIOServer => {
         if (!data.conversationId || !data.senderId || !data.content?.trim()) return;
         const content = data.content.trim().slice(0, 2000); // max 2000 chars
 
+        const validTypes: ('text' | 'file' | 'image')[] = ['text', 'file', 'image'];
+        const msgType: 'text' | 'file' | 'image' = (data.type && validTypes.includes(data.type as any)) ? (data.type as 'text' | 'file' | 'image') : 'text';
+
         const message = await Message.create({
           conversationId: data.conversationId,
           senderId: data.senderId,
           content,
-          type: data.type || 'text',
+          type: msgType,
         });
 
-        await message.populate('senderId', 'name avatar');
+        await (message as any).populate('senderId', 'name avatar');
 
         await Conversation.findByIdAndUpdate(data.conversationId, {
           lastMessage: content,

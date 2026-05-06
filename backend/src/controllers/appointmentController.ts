@@ -228,7 +228,7 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<vo
     const targetDate = new Date(`${date}T12:00:00`);
     const dayOfWeek = targetDate.getDay();
 
-    const availabilities = await Availability.find({ doctorId, dayOfWeek, isActive: true });
+    const availabilities = await Availability.find({ doctorId: String(doctorId), dayOfWeek, isActive: true });
 
     if (!availabilities || availabilities.length === 0) {
       res.json({ data: [] });
@@ -251,7 +251,7 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<vo
         const slotEnd = new Date(slotDate.getTime() + availability.slotDuration * 60000);
 
         const busy = await Appointment.findOne({
-          doctorId,
+          doctorId: String(doctorId),
           status: { $in: ['pending', 'confirmed', 'in_progress'] },
           appointmentDate: { $lt: slotEnd },
           appointmentEndDate: { $gt: slotDate },
