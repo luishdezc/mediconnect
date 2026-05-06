@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --exec ts-node src/app.ts",
-    "build": "tsc && xcopy uploads dist\\uploads /E /I /Y",
+    "build": "tsc && cp -r uploads dist/uploads 2>/dev/null || true",
     "start": "node dist/app.js",
     "lint": "eslint src/**/*.ts",
     "swagger": "ts-node src/config/swagger.ts",
