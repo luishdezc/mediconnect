@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useAuthStore } from '../store/authStore';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
@@ -6,8 +7,21 @@ const api = axios.create({
   timeout: 15000,
 });
 
+api.interceptors.request.use((config) => {
+  const token = useAuthStore.getState().token;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 api.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    if (res.data?.token) {
+      useAuthStore.getState().setToken(res.data.token);
+    }
+    return res;
+  },
   (error) => {
     const isLoginRequest = error.config?.url?.includes('/auth/login');
 

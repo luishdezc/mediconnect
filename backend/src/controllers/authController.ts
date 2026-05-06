@@ -1,10 +1,18 @@
 import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import passport from 'passport';
 import User, { IUser } from '../models/User';
 import Patient from '../models/Patient';
 import Doctor from '../models/Doctor';
 import { sendWelcomeEmail } from '../services/emailService';
+
+const signToken = (user: IUser) =>
+  jwt.sign(
+    { _id: user._id, role: user.role },
+    process.env.JWT_SECRET as string,
+    { expiresIn: '7d' }
+  );
 
 /**
  * @swagger
@@ -81,8 +89,10 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         res.status(500).json({ message: 'Error al iniciar sesión' });
         return;
       }
+      const token = signToken(user);
       res.status(201).json({
         message: 'Usuario registrado exitosamente',
+        token,
         user: {
           _id: user._id,
           name: user.name,
@@ -130,8 +140,10 @@ export const login = (req: Request, res: Response, next: NextFunction): void => 
     }
     req.login(user, (loginErr) => {
       if (loginErr) return next(loginErr);
+      const token = signToken(user);
       res.json({
         message: 'Sesión iniciada',
+        token,
         user: { _id: user._id, name: user.name, email: user.email, role: user.role },
       });
     });
@@ -195,5 +207,6 @@ export const getMe = async (req: Request, res: Response): Promise<void> => {
 
 export const googleCallback = (req: Request, res: Response): void => {
   const user = req.user as IUser;
-  res.redirect(`${process.env.CLIENT_URL}/auth/callback?role=${user.role}`);
+  const token = signToken(user);
+  res.redirect(`${process.env.CLIENT_URL}/auth/callback?role=${user.role}&token=${token}`);
 };

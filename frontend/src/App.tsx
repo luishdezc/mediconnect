@@ -43,10 +43,15 @@ function RedirectIfAuth({ children }: { children: React.ReactElement }) {
 }
 
 function OAuthCallback() {
-  const { fetchMe } = useAuthStore();
+  const { fetchMe, setToken } = useAuthStore();
   const location = useLocation();
-  const role = new URLSearchParams(location.search).get('role') || 'patient';
-  useEffect(() => { fetchMe().then(() => { window.location.href = `/${role}/dashboard`; }); }, []);
+  const params = new URLSearchParams(location.search);
+  const role = params.get('role') || 'patient';
+  const token = params.get('token');
+  useEffect(() => {
+    if (token) setToken(token);
+    fetchMe().then(() => { window.location.href = `/${role}/dashboard`; });
+  }, []);
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16, fontFamily: 'sans-serif' }}>
       <div style={{ fontSize: 48 }}>🏥</div>
