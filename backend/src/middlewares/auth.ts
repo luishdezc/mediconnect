@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { IUser } from '../models/User';
+import jwt from 'jsonwebtoken';
+import User, { IUser } from '../models/User';
 
-export const isAuthenticated = (req: Request, res: Response, next: NextFunction): void => {
+export const isAuthenticated = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  // 1. Session-based auth (localhost / same-domain)
   if (req.isAuthenticated()) {
     const user = req.user as IUser;
     if (!user.isActive) {
@@ -10,6 +12,24 @@ export const isAuthenticated = (req: Request, res: Response, next: NextFunction)
     }
     return next();
   }
+
+  // 2. JWT-based auth (cross-domain production)
+  const authHeader = req.headers.authorization;
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.slice(7);
+    try {
+      const payload = jwt.verify(token, process.env.JWT_SECRET as string) as { _id: string };
+      const user = await User.findById(payload._id);
+      if (!user) { res.status(401).json({ message: 'Usuario no encontrado' }); return; }
+      if (!user.isActive) { res.status(403).json({ message: 'Cuenta desactivada. Contacta al administrador.' }); return; }
+      req.user = user;
+      return next();
+    } catch {
+      res.status(401).json({ message: 'Token inválido o expirado' });
+      return;
+    }
+  }
+
   res.status(401).json({ message: 'Debes iniciar sesión para continuar' });
 };
 
