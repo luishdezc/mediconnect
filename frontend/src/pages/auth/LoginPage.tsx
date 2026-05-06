@@ -38,8 +38,9 @@ const LoginPage: React.FC = () => {
     <div className={styles.page}>
       <div className={styles.left}>
         <div className={styles.brand}>
-          <span className={styles.brandIcon}>🏥</span>
-          <span className={styles.brandName}>MediConnect</span>
+          <span className={styles.brandName}>
+            Medi<span>Connect</span>
+          </span>
         </div>
         <div className={styles.hero}>
           <h1>Tu salud,<br />organizada.</h1>

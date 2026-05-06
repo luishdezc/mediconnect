@@ -10,7 +10,6 @@ import { Select } from '../../components/ui/Input';
 import Pagination from '../../components/ui/Pagination';
 import Button from '../../components/ui/Button';
 import MedicalRecordModal from '../../components/doctor/MedicalRecordModal';
-import { Link } from 'react-router-dom';
 import { appointmentApi } from '../../api';
 import type { Appointment, Pagination as Pag } from '../../types';
 import styles from './DoctorAppointments.module.scss';
@@ -166,13 +165,6 @@ const DoctorAppointmentsPage: React.FC = () => {
                         >
                           Expediente
                         </Button>
-                      )}
-                      {appt.type === 'video' && appt.status === 'confirmed' && (
-                        <Link to="/doctor/video">
-                          <Button size="sm" icon={<Video size={14} />}>
-                            Video
-                          </Button>
-                        </Link>
                       )}
                       {appt.status === 'confirmed' && (
                         <Button

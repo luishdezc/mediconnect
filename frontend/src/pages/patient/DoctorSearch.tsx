@@ -99,8 +99,8 @@ const DoctorSearch: React.FC = () => {
           </div>
         </Card>
 
-        {}
-        {}
+        {/* Results */}
+        {/* Map view */}
         {viewMode === 'map' && (
           <div>
             <DoctorMap
@@ -150,7 +150,7 @@ const DoctorSearch: React.FC = () => {
                         }
                       </div>
                       <div className={styles.info}>
-                        <h3>{docUser?.name}</h3>
+                        <h3> Dr. {docUser?.name}</h3>
                         <span className={styles.spec}>{doc.specialization}</span>
                         <StarRating value={doc.rating || 0} readonly size={14} showNumber total={doc.totalReviews} />
                       </div>

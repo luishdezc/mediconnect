@@ -48,7 +48,6 @@ const VideoPage: React.FC = () => {
   const [chatLog, setChatLog]             = useState<{ from: string; text: string; time: string }[]>([]);
   const [callError, setCallError]         = useState<string | null>(null);
 
-  // Load video appointments
   useEffect(() => {
     appointmentApi.getMy({ status: 'confirmed' })
       .then(r => setAppointments(r.data.data.filter((a: Appointment) => a.type === 'video')))

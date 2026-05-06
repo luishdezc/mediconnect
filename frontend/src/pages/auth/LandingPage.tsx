@@ -5,9 +5,48 @@ import {
   Calendar, Shield, MessageSquare, Video,
   MapPin, Star, ArrowRight, CheckCircle,
 } from 'lucide-react';
-import { doctorApi } from '../../api';
 import type { Doctor } from '../../types';
 import styles from './LandingPage.module.scss';
+
+const MOCK_DOCTORS: Doctor[] = [
+  {
+    _id: '1',
+    specialization: 'Cardiología',
+    rating: 4.9,
+    totalReviews: 120,
+    locationAddress: 'Guadalajara, Jalisco',
+    isFeatured: true,
+    userId: {
+      name: 'Dra. Ana Martínez',
+      avatar: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2',
+    },
+  } as any,
+  {
+    _id: '2',
+    specialization: 'Dermatología',
+    rating: 4.8,
+    totalReviews: 95,
+    locationAddress: 'Zapopan, Jalisco',
+    isFeatured: true,
+    userId: {
+      name: 'Dr. Carlos López',
+      avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d',
+    },
+  } as any,
+  {
+    _id: '3',
+    specialization: 'Pediatría',
+    rating: 4.7,
+    totalReviews: 80,
+    locationAddress: 'Tlaquepaque, Jalisco',
+    isFeatured: true,
+    userId: {
+      name: 'Dra. Sofía Ramírez',
+      avatar: 'https://png.pngtree.com/png-vector/20250415/ourmid/pngtree-female-doctor-portrait-in-white-png-image_15971053.png',
+    },
+  } as any,
+];
+
 
 const FEATURES = [
   { icon: <Calendar size={28}/>, title: 'Citas en minutos', desc: 'Agenda tu consulta en pocos clics, sin llamadas ni esperas.' },
@@ -29,19 +68,18 @@ const LandingPage: React.FC = () => {
   const [featuredDoctors, setFeaturedDoctors] = useState<Doctor[]>([]);
 
   useEffect(() => {
-    doctorApi.getAll({ page: 1 })
-      .then(r => setFeaturedDoctors(r.data.data.filter((d: Doctor) => d.isFeatured).slice(0, 3)))
-      .catch(() => {});
+    setFeaturedDoctors(MOCK_DOCTORS);
   }, []);
 
   return (
     <div className={styles.page}>
-      {}
+      {/* ── Navbar ─────────────────────────────────────────────────────── */}
       <nav className={styles.nav}>
         <div className={styles.navInner}>
           <div className={styles.navBrand}>
-            <span>🏥</span>
-            <strong>MediConnect</strong>
+            <strong className={styles.logoText}>
+              Medi<span>Connect</span>
+            </strong>
           </div>
           <div className={styles.navLinks}>
             <a href="#features">Funciones</a>
@@ -55,14 +93,14 @@ const LandingPage: React.FC = () => {
         </div>
       </nav>
 
-      {}
+      {/* ── Hero ───────────────────────────────────────────────────────── */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
-          <div className={styles.heroBadge}>🚀 Plataforma gratuita para pacientes</div>
+          <div className={styles.heroBadge}>Plataforma gratuita para pacientes</div>
           <h1>Tu salud,<br/>organizada<br/><span>digitalmente.</span></h1>
           <p>
             Conecta con médicos verificados, agenda citas en línea y lleva un
-            seguimiento completo de tu historial médico — todo desde un solo lugar.
+            seguimiento completo de tu historial médico, todo desde un solo lugar.
           </p>
           <div className={styles.heroCtas}>
             <Link to="/register" className={styles.ctaPrimary}>
@@ -107,7 +145,7 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {}
+      {/* ── Features ───────────────────────────────────────────────────── */}
       <section className={styles.features} id="features">
         <div className={styles.sectionInner}>
           <div className={styles.sectionLabel}>Funcionalidades</div>
@@ -124,7 +162,7 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {}
+      {/* ── How it works ───────────────────────────────────────────────── */}
       <section className={styles.howSection} id="how">
         <div className={styles.sectionInner}>
           <div className={styles.sectionLabel}>¿Cómo funciona?</div>
@@ -142,7 +180,7 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {}
+      {/* ── Featured doctors ───────────────────────────────────────────── */}
       {featuredDoctors.length > 0 && (
         <section className={styles.doctorsSection} id="doctors">
           <div className={styles.sectionInner}>
@@ -153,6 +191,10 @@ const LandingPage: React.FC = () => {
                 const u = doc.userId as any;
                 return (
                   <div key={doc._id} className={styles.docCard}>
+                    <div className={styles.docBadges}>
+                      <span className={styles.badgeOnline}>Disponible hoy</span>
+                      <span className={styles.badgeVideo}>Videollamada</span>
+                    </div>
                     <div className={styles.docAvatar}>
                       {u?.avatar ? <img src={resolveAvatar(u.avatar)} alt={u.name}/> : <span>{u?.name?.[0]}</span>}
                     </div>
@@ -179,7 +221,7 @@ const LandingPage: React.FC = () => {
         </section>
       )}
 
-      {}
+      {/* ── CTA Banner ─────────────────────────────────────────────────── */}
       <section className={styles.ctaBanner}>
         <div className={styles.ctaBannerInner}>
           <h2>¿Listo para cuidar tu salud?</h2>
@@ -190,19 +232,8 @@ const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {}
+      {/* ── Footer ─────────────────────────────────────────────────────── */}
       <footer className={styles.footer}>
-        <div className={styles.footerInner}>
-          <div className={styles.footerBrand}>
-            <span>🏥</span><strong>MediConnect</strong>
-            <p>Plataforma de gestión de citas médicas.</p>
-          </div>
-          <div className={styles.footerLinks}>
-            <Link to="/login">Iniciar sesión</Link>
-            <Link to="/register">Registrarse</Link>
-            <Link to="/setup-admin">Configurar admin</Link>
-          </div>
-        </div>
         <div className={styles.footerCopy}>
           © {new Date().getFullYear()} MediConnect. Todos los derechos reservados.
         </div>

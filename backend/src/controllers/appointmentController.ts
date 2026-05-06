@@ -91,6 +91,7 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
       doctorName: doctorUser.name,
       date: start,
       type,
+      address: doctor.locationAddress || '',
     });
 
     res.status(201).json({ message: 'Cita agendada exitosamente', appointment });
@@ -196,6 +197,7 @@ export const updateAppointmentStatus = async (req: Request, res: Response): Prom
     const appointment = await Appointment.findById(id);
     if (!appointment) { res.status(404).json({ message: 'Cita no encontrada' }); return; }
 
+    // Permissions check
     if (user.role === 'patient') {
       const patient = await Patient.findOne({ userId: user._id });
       if (!appointment.patientId.equals(patient!._id)) {
@@ -223,34 +225,54 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<vo
     const { doctorId, date } = req.query;
     if (!doctorId || !date) { res.status(400).json({ message: 'doctorId y date requeridos' }); return; }
 
-    const targetDate = new Date(date as string);
+    const targetDate = new Date(`${date}T12:00:00`);
     const dayOfWeek = targetDate.getDay();
 
-    const availability = await Availability.findOne({ doctorId, dayOfWeek, isActive: true });
-    if (!availability) { res.json({ data: [] }); return; }
+    const availabilities = await Availability.find({ doctorId, dayOfWeek, isActive: true });
 
-    const slots: string[] = [];
-    const [startH, startM] = availability.startTime.split(':').map(Number);
-    const [endH, endM] = availability.endTime.split(':').map(Number);
-    const startMinutes = startH * 60 + startM;
-    const endMinutes = endH * 60 + endM;
-
-    for (let m = startMinutes; m < endMinutes; m += availability.slotDuration) {
-      const slotDate = new Date(targetDate);
-      slotDate.setHours(Math.floor(m / 60), m % 60, 0, 0);
-      const slotEnd = new Date(slotDate.getTime() + availability.slotDuration * 60000);
-
-      const busy = await Appointment.findOne({
-        doctorId,
-        status: { $in: ['pending', 'confirmed', 'in_progress'] },
-        appointmentDate: { $lt: slotEnd },
-        appointmentEndDate: { $gt: slotDate },
-      });
-
-      slots.push(JSON.stringify({ time: slotDate.toISOString(), available: !busy }));
+    if (!availabilities || availabilities.length === 0) {
+      res.json({ data: [] });
+      return;
     }
 
-    res.json({ data: slots.map((s) => JSON.parse(s)) });
+    const slots: { time: string; available: boolean }[] = [];
+
+    for (const availability of availabilities) {
+      const [startH, startM] = availability.startTime.split(':').map(Number);
+      const [endH, endM] = availability.endTime.split(':').map(Number);
+
+      const startMinutes = startH * 60 + startM;
+      const endMinutes = endH * 60 + endM;
+
+      for (let m = startMinutes; m < endMinutes; m += availability.slotDuration) {
+        const slotDate = new Date(targetDate);
+        slotDate.setHours(Math.floor(m / 60), m % 60, 0, 0);
+
+        const slotEnd = new Date(slotDate.getTime() + availability.slotDuration * 60000);
+
+        const busy = await Appointment.findOne({
+          doctorId,
+          status: { $in: ['pending', 'confirmed', 'in_progress'] },
+          appointmentDate: { $lt: slotEnd },
+          appointmentEndDate: { $gt: slotDate },
+        });
+
+        slots.push({
+          time: slotDate.toISOString(),
+          available: !busy,
+        });
+      }
+    }
+
+    const unique = new Map();
+    slots.forEach(s => unique.set(s.time, s));
+
+    const sorted = Array.from(unique.values()).sort(
+      (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()
+    );
+
+    res.json({ data: sorted });
+
   } catch (error) {
     res.status(500).json({ message: 'Error al obtener slots' });
   }

@@ -163,7 +163,7 @@ const PatientDashboard: React.FC = () => {
               { to: '/patient/appointments', icon: '📅', label: 'Mis Citas',          desc: 'Ver y gestionar citas' },
               { to: '/patient/records',      icon: '📋', label: 'Historial Médico',   desc: 'Expedientes y recetas' },
               { to: '/patient/chat',         icon: '💬', label: 'Mensajes',           desc: 'Chatea con tu doctor' },
-              { to: '/patient/medications',  icon: '💊', label: 'Medicamentos',        desc: 'Compara precios y farmacias' },
+              { to: '/patient/medications',  icon: '💊', label: 'Medicamentos',        desc: 'Consulta tus medicamentos recetados' },
             ].map(a => (
               <Link key={a.to} to={a.to} className={styles.quickCard}>
                 <span className={styles.quickIcon}>{a.icon}</span>

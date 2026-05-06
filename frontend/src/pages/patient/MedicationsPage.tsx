@@ -1,250 +1,192 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Star, Pill, ShoppingCart, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Pill, Clock, Calendar, CheckCircle, AlertCircle, FileText } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { differenceInDays, parseISO, addDays, format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import { Card } from '../../components/ui/Card';
-import { Input } from '../../components/ui/Input';
+import Spinner from '../../components/ui/Spinner';
 import { recordApi } from '../../api';
 import styles from './MedicationsPage.module.scss';
 
-interface MedStore { name: string; price: number; url: string; delivery?: string; logo: string; }
-interface Medication {
-  id: string;
+interface ActiveMed {
+  recordId: string;
+  recordDate: string;
+  doctorName: string;
+  diagnosis: string;
   name: string;
-  generic?: string;
-  category: string;
-  description: string;
-  sponsored?: boolean;
-  sponsorLabel?: string;
-  stores: MedStore[];
+  doseLabel: string;
+  pillsPerDay: number;
+  frequencyHours: number;
+  durationDays: number;
+  startDate: string;
+  endDate: Date;
+  daysLeft: number;
+  totalDays: number;
+  progressPct: number;   
+  expired: boolean;
 }
 
-const MEDICATIONS: Medication[] = [
-  {
-    id: 'omeprazol-20',
-    name: 'Omeprazol 20mg',
-    generic: 'Omeprazol',
-    category: 'Gastrointestinal',
-    description: 'Inhibidor de bomba de protones para gastritis y reflujo.',
-    sponsored: true,
-    sponsorLabel: 'Farmacia del Ahorro — Patrocinado',
-    stores: [
-      { name: 'Farmacia del Ahorro', price: 89,  logo: '💊', url: 'https://www.farmaciasdelahorro.com.mx', delivery: 'Envío gratis' },
-      { name: 'Farmacias Guadalajara', price: 95,  logo: '🏥', url: 'https://www.fasa.com.mx' },
-      { name: 'Similares', price: 45,  logo: '🟢', url: 'https://www.similares.com.mx' },
-      { name: 'Walmart Farmacia', price: 82,  logo: '🛒', url: 'https://www.walmart.com.mx', delivery: 'Envío a domicilio' },
-    ],
-  },
-  {
-    id: 'metformina-850',
-    name: 'Metformina 850mg',
-    generic: 'Metformina HCl',
-    category: 'Diabetes',
-    description: 'Antidiabético oral para el control de glucosa en diabetes tipo 2.',
-    sponsored: true,
-    sponsorLabel: 'Farmacias Benavides — Patrocinado',
-    stores: [
-      { name: 'Farmacias Benavides', price: 120, logo: '🔵', url: 'https://www.benavides.com.mx', delivery: 'Envío gratis +$300' },
-      { name: 'Farmacia del Ahorro', price: 135, logo: '💊', url: 'https://www.farmaciasdelahorro.com.mx' },
-      { name: 'Similares', price: 65,  logo: '🟢', url: 'https://www.similares.com.mx' },
-      { name: 'Chedraui Farmacia',  price: 128, logo: '🏪', url: 'https://www.chedraui.com.mx' },
-    ],
-  },
-  {
-    id: 'losartan-50',
-    name: 'Losartán 50mg',
-    generic: 'Losartán Potásico',
-    category: 'Cardiovascular',
-    description: 'Antagonista del receptor de angiotensina II para la hipertensión arterial.',
-    sponsored: true,
-    sponsorLabel: 'Farmacia del Ahorro — Patrocinado',
-    stores: [
-      { name: 'Farmacia del Ahorro',   price: 145, logo: '💊', url: 'https://www.farmaciasdelahorro.com.mx', delivery: 'Envío gratis' },
-      { name: 'Farmacias Guadalajara', price: 158, logo: '🏥', url: 'https://www.fasa.com.mx' },
-      { name: 'Similares',             price: 89,  logo: '🟢', url: 'https://www.similares.com.mx' },
-      { name: 'Sam\'s Club Farmacia',  price: 132, logo: '🏬', url: 'https://www.sams.com.mx' },
-    ],
-  },
-  {
-    id: 'amoxicilina-500',
-    name: 'Amoxicilina 500mg',
-    generic: 'Amoxicilina',
-    category: 'Antibióticos',
-    description: 'Antibiótico de amplio espectro para infecciones bacterianas.',
-    stores: [
-      { name: 'Similares',             price: 85,  logo: '🟢', url: 'https://www.similares.com.mx' },
-      { name: 'Farmacia del Ahorro',   price: 120, logo: '💊', url: 'https://www.farmaciasdelahorro.com.mx' },
-      { name: 'Farmacias Guadalajara', price: 132, logo: '🏥', url: 'https://www.fasa.com.mx' },
-      { name: 'Farmacias Benavides',   price: 115, logo: '🔵', url: 'https://www.benavides.com.mx' },
-    ],
-  },
-  {
-    id: 'ibuprofeno-400',
-    name: 'Ibuprofeno 400mg',
-    generic: 'Ibuprofeno',
-    category: 'Analgésicos / AINE',
-    description: 'Antiinflamatorio no esteroideo para dolor, fiebre e inflamación.',
-    stores: [
-      { name: 'Walmart Farmacia',      price: 42,  logo: '🛒', url: 'https://www.walmart.com.mx', delivery: 'Envío a domicilio' },
-      { name: 'Similares',             price: 35,  logo: '🟢', url: 'https://www.similares.com.mx' },
-      { name: 'Farmacia del Ahorro',   price: 55,  logo: '💊', url: 'https://www.farmaciasdelahorro.com.mx' },
-      { name: 'OXXO',                  price: 68,  logo: '🏪', url: '#' },
-    ],
-  },
-  {
-    id: 'atorvastatina-20',
-    name: 'Atorvastatina 20mg',
-    generic: 'Atorvastatina Cálcica',
-    category: 'Cardiovascular',
-    description: 'Estatina para el control del colesterol y triglicéridos elevados.',
-    stores: [
-      { name: 'Similares',             price: 95,  logo: '🟢', url: 'https://www.similares.com.mx' },
-      { name: 'Farmacia del Ahorro',   price: 210, logo: '💊', url: 'https://www.farmaciasdelahorro.com.mx' },
-      { name: 'Farmacias Guadalajara', price: 225, logo: '🏥', url: 'https://www.fasa.com.mx' },
-      { name: 'Chedraui Farmacia',     price: 198, logo: '🏪', url: 'https://www.chedraui.com.mx' },
-    ],
-  },
-  {
-    id: 'salbutamol-100',
-    name: 'Salbutamol Inhalador 100mcg',
-    generic: 'Salbutamol / Albuterol',
-    category: 'Respiratorio',
-    description: 'Broncodilatador de acción rápida para el asma y EPOC.',
-    stores: [
-      { name: 'Farmacias Benavides',   price: 185, logo: '🔵', url: 'https://www.benavides.com.mx' },
-      { name: 'Farmacia del Ahorro',   price: 195, logo: '💊', url: 'https://www.farmaciasdelahorro.com.mx', delivery: 'Envío gratis' },
-      { name: 'Farmacias Guadalajara', price: 202, logo: '🏥', url: 'https://www.fasa.com.mx' },
-      { name: 'Similares',             price: 155, logo: '🟢', url: 'https://www.similares.com.mx' },
-    ],
-  },
-  {
-    id: 'levotiroxina-100',
-    name: 'Levotiroxina 100mcg',
-    generic: 'Levotiroxina Sódica',
-    category: 'Tiroides',
-    description: 'Hormona tiroidea sintética para el hipotiroidismo.',
-    stores: [
-      { name: 'Similares',             price: 78,  logo: '🟢', url: 'https://www.similares.com.mx' },
-      { name: 'Farmacia del Ahorro',   price: 125, logo: '💊', url: 'https://www.farmaciasdelahorro.com.mx' },
-      { name: 'Sam\'s Club Farmacia',  price: 98,  logo: '🏬', url: 'https://www.sams.com.mx' },
-      { name: 'Farmacias Benavides',   price: 118, logo: '🔵', url: 'https://www.benavides.com.mx' },
-    ],
-  },
-  {
-    id: 'sertralina-50',
-    name: 'Sertralina 50mg',
-    generic: 'Sertralina HCl',
-    category: 'Psiquiatría',
-    description: 'Inhibidor selectivo de la recaptación de serotonina (ISRS) para depresión y ansiedad.',
-    stores: [
-      { name: 'Similares',             price: 110, logo: '🟢', url: 'https://www.similares.com.mx' },
-      { name: 'Farmacia del Ahorro',   price: 185, logo: '💊', url: 'https://www.farmaciasdelahorro.com.mx' },
-      { name: 'Farmacias Guadalajara', price: 198, logo: '🏥', url: 'https://www.fasa.com.mx' },
-      { name: 'Walmart Farmacia',      price: 172, logo: '🛒', url: 'https://www.walmart.com.mx' },
-    ],
-  },
-];
+const frequencyLabel = (h: number): string => {
+  if (h === 24) return 'Una vez al día';
+  if (h === 12) return 'Cada 12h (dos veces)';
+  if (h === 8)  return 'Cada 8h (tres veces)';
+  if (h === 6)  return 'Cada 6h (cuatro veces)';
+  return `Cada ${h} horas`;
+};
 
 const MedicationsPage: React.FC = () => {
-
-  const [query, setQuery]             = useState('');
-  const [expanded, setExpanded]       = useState<string | null>(null);
-  const [prescribedNames, setPrescribed] = useState<string[]>([]);
+  const [allMeds,  setAllMeds]  = useState<ActiveMed[]>([]);
+  const [loading,  setLoading]  = useState(true);
+  const [showDone, setShowDone] = useState(false);
 
   useEffect(() => {
-    recordApi.getMy(1).then(r => {
-      const names: string[] = [];
-      r.data.data.forEach((rec: any) => {
-        if (rec.prescription) {
-          const lines = rec.prescription.split('\n').map((l: string) => l.trim()).filter(Boolean);
-          lines.forEach((line: string) => {
-            const match = line.match(/^([A-Za-záéíóúüñÁÉÍÓÚÜÑ ]+?)(?:\s+\d|\s+-|\s+\(|$)/);
-            const name = match ? match[1].trim() : line.split(/[\d–—-]/)[0].trim();
-            if (name.length > 2) names.push(name);
+    const fetchAll = async () => {
+      setLoading(true);
+      try {
+        const pages = await Promise.all([
+          recordApi.getMy(1).catch(() => null),
+          recordApi.getMy(2).catch(() => null),
+          recordApi.getMy(3).catch(() => null),
+        ]);
+
+        const records: any[] = [];
+        pages.forEach(p => { if (p?.data?.data) records.push(...p.data.data); });
+
+        const today = new Date();
+        const extracted: ActiveMed[] = [];
+
+        records.forEach((rec: any) => {
+          if (!rec.medications || rec.medications.length === 0) return;
+
+          const doctorName = rec.doctorId?.userId?.name || 'Tu doctor';
+          const recDate    = rec.createdAt;
+          const diagnosis  = rec.diagnosis || '';
+
+          rec.medications.forEach((m: any) => {
+            const startDate = m.startDate ? parseISO(m.startDate) : parseISO(recDate);
+            const endDate   = addDays(startDate, m.durationDays);
+            const daysLeft  = Math.max(0, differenceInDays(endDate, today));
+            const elapsed   = m.durationDays - daysLeft;
+            const progressPct = Math.min(100, Math.round((elapsed / m.durationDays) * 100));
+            const expired   = today > endDate;
+
+            extracted.push({
+              recordId:      rec._id,
+              recordDate:    recDate,
+              doctorName,
+              diagnosis,
+              name:          m.name,
+              doseLabel:     m.doseLabel,
+              pillsPerDay:   m.pillsPerDay,
+              frequencyHours:m.frequencyHours,
+              durationDays:  m.durationDays,
+              startDate:     startDate.toISOString(),
+              endDate,
+              daysLeft,
+              totalDays:     m.durationDays,
+              progressPct,
+              expired,
+            });
           });
-        }
-      });
-      setPrescribed([...new Set(names)]);
-    }).catch(() => {});
+        });
+
+        extracted.sort((a, b) => {
+          if (a.expired !== b.expired) return a.expired ? 1 : -1;
+          return a.daysLeft - b.daysLeft;
+        });
+
+        setAllMeds(extracted);
+      } catch (err) {
+        console.error('Error loading medications:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAll();
   }, []);
 
-  const sponsored = MEDICATIONS.filter(m => m.sponsored);
-  const catalog   = MEDICATIONS.filter(m => !m.sponsored);
+  const activeMeds  = useMemo(() => allMeds.filter(m => !m.expired), [allMeds]);
+  const expiredMeds = useMemo(() => allMeds.filter(m => m.expired),  [allMeds]);
 
-  const filtered = query.trim()
-    ? MEDICATIONS.filter(m =>
-        m.name.toLowerCase().includes(query.toLowerCase()) ||
-        m.generic?.toLowerCase().includes(query.toLowerCase()) ||
-        m.category.toLowerCase().includes(query.toLowerCase())
-      )
-    : null;
-
-  const toggle = (id: string) => setExpanded(p => p === id ? null : id);
-
-  const MedCard = ({ med }: { med: Medication }) => {
-    const sorted = [...med.stores].sort((a, b) => a.price - b.price);
-    const best   = sorted[0];
-    const isOpen = expanded === med.id;
+  const MedCard = ({ med }: { med: ActiveMed }) => {
+    const urgency = med.daysLeft <= 1 ? 'urgent' : med.daysLeft <= 3 ? 'warning' : 'normal';
 
     return (
-      <div className={[styles.medCard, med.sponsored ? styles['medCard--sponsored'] : ''].join(' ')}>
-        {med.sponsored && (
-          <div className={styles.sponsoredBadge}>
-            <Star size={11} fill="#f0b96a" stroke="#f0b96a" /> {med.sponsorLabel}
-          </div>
-        )}
-
-        <button className={styles.medHeader} onClick={() => toggle(med.id)}>
+      <div className={[styles.medCard, styles[`medCard--${urgency}`], med.expired ? styles['medCard--expired'] : ''].join(' ')}>
+        {/* Header */}
+        <div className={styles.medHeader}>
           <div className={styles.medIcon}>
             <Pill size={20} />
           </div>
           <div className={styles.medInfo}>
-            <strong>{med.name}</strong>
-            {med.generic && <span className={styles.medGeneric}>{med.generic}</span>}
-            <span className={styles.medCategory}>{med.category}</span>
+            <h3 className={styles.medName}>{med.name}</h3>
+            <span className={styles.medDose}>{med.doseLabel}</span>
           </div>
-          <div className={styles.bestPrice}>
-            <span className={styles.bestLabel}>Mejor precio</span>
-            <span className={styles.bestAmount}>${best.price}</span>
-            <span className={styles.bestStore}>{best.name}</span>
+          {med.expired ? (
+            <span className={styles.expiredBadge}><CheckCircle size={14} /> Completado</span>
+          ) : med.daysLeft === 0 ? (
+            <span className={styles.todayBadge}><AlertCircle size={14} /> Último día</span>
+          ) : med.daysLeft <= 3 ? (
+            <span className={styles.urgentBadge}><AlertCircle size={14} /> {med.daysLeft} día{med.daysLeft > 1 ? 's' : ''}</span>
+          ) : (
+            <span className={styles.daysLeftBadge}><Calendar size={14} /> {med.daysLeft} días</span>
+          )}
+        </div>
+
+        {/* Details grid */}
+        <div className={styles.medDetails}>
+          <div className={styles.detailItem}>
+            <span className={styles.detailLabel}>Pastillas al día</span>
+            <span className={styles.detailValue}>{med.pillsPerDay}</span>
           </div>
-          {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
-        </button>
+          <div className={styles.detailItem}>
+            <span className={styles.detailLabel}>Frecuencia</span>
+            <span className={styles.detailValue}>{frequencyLabel(med.frequencyHours)}</span>
+          </div>
+          <div className={styles.detailItem}>
+            <span className={styles.detailLabel}>Duración total</span>
+            <span className={styles.detailValue}>{med.totalDays} días</span>
+          </div>
+          <div className={styles.detailItem}>
+            <span className={styles.detailLabel}>Fecha fin</span>
+            <span className={styles.detailValue}>
+              {format(med.endDate, "d 'de' MMMM", { locale: es })}
+            </span>
+          </div>
+        </div>
 
-        {isOpen && (
-          <div className={styles.medBody}>
-            <p className={styles.medDesc}>{med.description}</p>
-
-            <div className={styles.storesGrid}>
-              {sorted.map((store, i) => (
-                <div
-                  key={store.name}
-                  className={[styles.storeCard, i === 0 ? styles['storeCard--best'] : ''].join(' ')}
-                >
-                  {i === 0 && <div className={styles.bestTag}>✓ Más barato</div>}
-                  <div className={styles.storeLogo}>{store.logo}</div>
-                  <div className={styles.storeName}>{store.name}</div>
-                  <div className={styles.storePrice}>${store.price} <span>MXN</span></div>
-                  {store.delivery && (
-                    <div className={styles.storeDelivery}>{store.delivery}</div>
-                  )}
-                  <a
-                    href={store.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={styles.storeBtn}
-                    onClick={e => store.url === '#' && e.preventDefault()}
-                  >
-                    <ShoppingCart size={13} /> Comprar
-                  </a>
-                </div>
-              ))}
+        {/* Progress bar */}
+        {!med.expired && (
+          <div className={styles.progressWrap}>
+            <div className={styles.progressTrack}>
+              <div
+                className={[styles.progressFill, styles[`progressFill--${urgency}`]].join(' ')}
+                style={{ width: `${med.progressPct}%` }}
+              />
             </div>
-
-            <div className={styles.priceDisclaimer}>
-              * Los precios son referenciales y pueden variar. Consulta el precio exacto en cada farmacia.
-            </div>
+            <span className={styles.progressLabel}>
+              {med.progressPct}% completado · {med.daysLeft} día{med.daysLeft !== 1 ? 's' : ''} restante{med.daysLeft !== 1 ? 's' : ''}
+            </span>
           </div>
         )}
+
+        {/* Next dose hint */}
+        {!med.expired && (
+          <div className={styles.nextDose}>
+            <Clock size={13} />
+            <span>
+              Tomar {med.pillsPerDay} pastilla{med.pillsPerDay > 1 ? 's' : ''} · {frequencyLabel(med.frequencyHours).toLowerCase()}
+            </span>
+          </div>
+        )}
+
+        {/* Meta */}
+        <div className={styles.medMeta}>
+          <span>Recetado por <strong>{med.doctorName}</strong></span>
+          {med.diagnosis && <span>Dx: {med.diagnosis}</span>}
+        </div>
       </div>
     );
   };
@@ -252,79 +194,87 @@ const MedicationsPage: React.FC = () => {
   return (
     <DashboardLayout>
       <div className={styles.page}>
+
+        {/* Header */}
         <div className={styles.header}>
           <div>
-            <h1>Medicamentos</h1>
-            <p>Compara precios en farmacias y encuentra dónde comprar más barato</p>
+            <h1>Mis Medicamentos</h1>
+            <p>Seguimiento de tu tratamiento activo con días restantes actualizados</p>
           </div>
+          {activeMeds.length > 0 && (
+            <div className={styles.summaryBadge}>
+              <Pill size={16} />
+              <span>{activeMeds.length} activo{activeMeds.length > 1 ? 's' : ''}</span>
+            </div>
+          )}
         </div>
 
-        {prescribedNames.length > 0 && (
-          <div className={styles.prescribedAlert}>
-            <Pill size={18} />
-            <div>
-              <strong>Medicamentos recetados en tu expediente</strong>
-              <div className={styles.prescribedTags}>
-                {prescribedNames.slice(0, 6).map(n => (
-                  <button
-                    key={n}
-                    className={styles.prescribedTag}
-                    onClick={() => setQuery(n)}
-                  >
-                    {n}
-                  </button>
-                ))}
-              </div>
+        {loading ? (
+          <Spinner size="md" label="Cargando medicamentos…" />
+        ) : allMeds.length === 0 ? (
+          /* Empty state — no records with medications */
+          <Card>
+            <div className={styles.empty}>
+              <Pill size={48} strokeWidth={1} />
+              <h3>Sin medicamentos recetados</h3>
+              <p>
+                Cuando tu doctor cree un expediente médico con tu receta,
+                tus medicamentos aparecerán aquí con días restantes y frecuencia.
+              </p>
+              <Link to="/patient/records" className={styles.recordsLink}>
+                <FileText size={14} /> Ver historial médico
+              </Link>
             </div>
-          </div>
-        )}
-
-        <Card padding="sm">
-          <Input
-            placeholder="Buscar medicamento por nombre, genérico o categoría…"
-            icon={<Search size={16} />}
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-          />
-        </Card>
-
-        {filtered !== null ? (
-          <div className={styles.section}>
-            <h2 className={styles.sectionTitle}>
-              {filtered.length} resultado{filtered.length !== 1 ? 's' : ''} para "{query}"
-            </h2>
-            {filtered.length === 0 ? (
-              <Card>
-                <div className={styles.empty}>
-                  <Pill size={40} strokeWidth={1.2} />
-                  <h3>Sin resultados</h3>
-                  <p>No encontramos ese medicamento. Prueba con el nombre genérico.</p>
-                </div>
-              </Card>
-            ) : (
-              filtered.map(med => <MedCard key={med.id} med={med} />)
-            )}
-          </div>
+          </Card>
         ) : (
           <>
-            <div className={styles.section}>
-              <div className={styles.sectionHeader}>
-                <h2 className={styles.sectionTitle}>⭐ Medicamentos destacados</h2>
-                <span className={styles.sponsoredNote}>Contenido patrocinado</span>
-              </div>
-              {sponsored.map(med => <MedCard key={med.id} med={med} />)}
-            </div>
+            {/* Active medications */}
+            {activeMeds.length > 0 ? (
+              <section>
+                <h2 className={styles.sectionTitle}>
+                  💊 Tratamiento activo
+                  <span className={styles.sectionCount}>{activeMeds.length}</span>
+                </h2>
+                <div className={styles.grid}>
+                  {activeMeds.map((m, i) => <MedCard key={`${m.recordId}-${i}`} med={m} />)}
+                </div>
+              </section>
+            ) : (
+              <Card>
+                <div className={styles.noActive}>
+                  <CheckCircle size={32} />
+                  <p>No tienes tratamientos activos en este momento.</p>
+                </div>
+              </Card>
+            )}
 
-            <div className={styles.section}>
-              <h2 className={styles.sectionTitle}>📋 Catálogo general</h2>
-              {catalog.map(med => <MedCard key={med.id} med={med} />)}
+            {/* Expired / completed */}
+            {expiredMeds.length > 0 && (
+              <section>
+                <button
+                  className={styles.showDoneBtn}
+                  onClick={() => setShowDone(p => !p)}
+                >
+                  {showDone ? '▲' : '▼'} Tratamientos completados ({expiredMeds.length})
+                </button>
+                {showDone && (
+                  <div className={styles.grid}>
+                    {expiredMeds.map((m, i) => <MedCard key={`${m.recordId}-done-${i}`} med={m} />)}
+                  </div>
+                )}
+              </section>
+            )}
+
+            {/* Disclaimer */}
+            <div className={styles.disclaimer}>
+              <AlertCircle size={14} />
+              <span>
+                <strong>Aviso médico:</strong> No suspendas ni modifiques tu tratamiento
+                sin consultar a tu médico. Esta pantalla es solo informativa.
+              </span>
             </div>
           </>
         )}
-
-        <div className={styles.disclaimer}>
-          <strong>⚕️ Aviso médico:</strong> Este comparador es solo informativo. Siempre consulta a tu médico antes de comprar o cambiar medicamentos. Los precios pueden variar según la farmacia y disponibilidad.
-        </div>
       </div>
     </DashboardLayout>
   );
