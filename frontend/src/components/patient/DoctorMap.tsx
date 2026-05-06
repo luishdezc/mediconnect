@@ -2,20 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import styles from "./DoctorMap.module.scss";
-
-interface Doctor {
-  _id: string;
-  userId?: { name?: string };
-  specialization?: string;
-  locationLat?: number;
-  locationLng?: number;
-  locationAddress?: string;
-}
+import type { Doctor } from "../../types";
 
 interface Props {
   doctors: Doctor[];
   selectedId?: string;
   onSelect: (doc: Doctor) => void;
+  userLat?: number;
+  userLng?: number;
 }
 
 const DoctorMap = ({ doctors, selectedId, onSelect }: Props) => {
