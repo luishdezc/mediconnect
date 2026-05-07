@@ -87,12 +87,17 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
       patient: { name: user.name, email: user.email },
     });
 
-    await sendAppointmentConfirmation(user.email, user.name, {
-      doctorName: doctorUser.name,
-      date: start,
-      type,
-      address: doctor.locationAddress || '',
-    });
+    // Email is non-critical — don't let it fail the whole request
+    try {
+      await sendAppointmentConfirmation(user.email, user.name, {
+        doctorName: doctorUser.name,
+        date: start,
+        type,
+        address: doctor.locationAddress || '',
+      });
+    } catch (emailErr) {
+      console.error('Appointment confirmation email failed (non-fatal):', emailErr);
+    }
 
     res.status(201).json({ message: 'Cita agendada exitosamente', appointment });
   } catch (error) {
@@ -225,6 +230,7 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<vo
     const { doctorId, date } = req.query;
     if (!doctorId || !date) { res.status(400).json({ message: 'doctorId y date requeridos' }); return; }
 
+    // Parse date string as local noon to get correct day-of-week regardless of server timezone
     const targetDate = new Date(`${date}T12:00:00`);
     const dayOfWeek = targetDate.getDay();
 
@@ -234,6 +240,9 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<vo
       res.json({ data: [] });
       return;
     }
+
+    // Current time in Mexico City for past-slot filtering
+    const nowMX = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
 
     const slots: { time: string; available: boolean }[] = [];
 
@@ -245,22 +254,36 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<vo
       const endMinutes = endH * 60 + endM;
 
       for (let m = startMinutes; m < endMinutes; m += availability.slotDuration) {
-        const slotDate = new Date(targetDate);
-        slotDate.setHours(Math.floor(m / 60), m % 60, 0, 0);
+        const hh = Math.floor(m / 60);
+        const mm = m % 60;
 
-        const slotEnd = new Date(slotDate.getTime() + availability.slotDuration * 60000);
+        // Build time string as "yyyy-MM-ddTHH:mm:00" — no timezone suffix
+        // The frontend will parse this as LOCAL time, showing exactly what the doctor configured
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const localTimeStr = `${date}T${pad(hh)}:${pad(mm)}:00`;
+
+        // For past-slot check: compare with Mexico City current time
+        const slotMX = new Date(`${date}T${pad(hh)}:${pad(mm)}:00`);
+        const isPast = slotMX.getTime() < nowMX.getTime() + 5 * 60 * 1000;
+
+        if (isPast) {
+          slots.push({ time: localTimeStr, available: false });
+          continue;
+        }
+
+        // For DB conflict check we need real UTC instants
+        // Slots are stored in UTC in the DB, so convert Mexico City time to UTC
+        const slotUTC = new Date(new Date(localTimeStr).toLocaleString('en-US', { timeZone: 'UTC' }));
+        const slotEndUTC = new Date(slotUTC.getTime() + availability.slotDuration * 60000);
 
         const busy = await Appointment.findOne({
           doctorId: String(doctorId),
           status: { $in: ['pending', 'confirmed', 'in_progress'] },
-          appointmentDate: { $lt: slotEnd },
-          appointmentEndDate: { $gt: slotDate },
+          appointmentDate: { $lt: slotEndUTC },
+          appointmentEndDate: { $gt: slotUTC },
         });
 
-        slots.push({
-          time: slotDate.toISOString(),
-          available: !busy,
-        });
+        slots.push({ time: localTimeStr, available: !busy });
       }
     }
 

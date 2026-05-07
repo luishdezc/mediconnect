@@ -10,6 +10,7 @@ import Button from '../../components/ui/Button';
 import { Input, Textarea, Select } from '../../components/ui/Input';
 import { useAuthStore } from '../../store/authStore';
 import api, { doctorApi } from '../../api';
+import { resolveAvatar } from '../../utils/avatar';
 import type { Doctor } from '../../types';
 import styles from './SettingsPage.module.scss';
 
@@ -31,7 +32,7 @@ const SettingsPage: React.FC = () => {
 
   const [name,   setName]   = useState(user?.name || '');
   const [avatar, setAvatar] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState(user?.avatar || '');
+  const [avatarPreview, setAvatarPreview] = useState(resolveAvatar(user?.avatar) || '');
 
 
   const [oldPass,  setOldPass]  = useState('');
@@ -54,7 +55,7 @@ const SettingsPage: React.FC = () => {
 
   useEffect(() => {
     if (user) setName(user.name);
-    if (user?.avatar) setAvatarPreview(user.avatar);
+    if (user?.avatar) setAvatarPreview(resolveAvatar(user.avatar) || '');
     if (profile && user?.role === 'doctor') {
       setDocProfile({
         specialization:  profile.specialization  || '',
@@ -85,7 +86,8 @@ const SettingsPage: React.FC = () => {
       const fd = new FormData();
       fd.append('name', name.trim());
       if (avatar) fd.append('avatar', avatar);
-      await api.put('/users/profile', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      const res = await api.put('/users/profile', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      if (res.data?.user?.avatar) setAvatarPreview(resolveAvatar(res.data.user.avatar) || '');
       await fetchMe();
       toast.success('Perfil actualizado');
     } catch (e: any) {
