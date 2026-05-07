@@ -79,8 +79,18 @@ const BookAppointmentModal: React.FC<Props> = ({ doctor, onClose, onSuccess }) =
   const isSelectedDay = (d: Date) =>
     selectedDate && format(d, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
 
-  const availableSlots = slots.filter(s => s.available);
-  const takenSlots     = slots.filter(s => !s.available);
+  const now = new Date();
+  const effectiveSlots = slots.map(s => {
+    if (s.available && selectedDate && isToday(selectedDate)) {
+      const slotTime = new Date(s.time);
+      if (slotTime.getTime() < now.getTime() + 5 * 60 * 1000) {
+        return { ...s, available: false };
+      }
+    }
+    return s;
+  });
+  const availableSlots = effectiveSlots.filter(s => s.available);
+  const takenSlots     = effectiveSlots.filter(s => !s.available);
 
   const handleBook = async () => {
     if (!selectedSlot) { toast.error('Selecciona un horario'); return; }
@@ -226,7 +236,7 @@ const BookAppointmentModal: React.FC<Props> = ({ doctor, onClose, onSuccess }) =
                   <span>{availableSlots.length} disponibles · {takenSlots.length} ocupados</span>
                 </div>
                 <div className={styles.slotsGrid}>
-                  {slots.map(slot => {
+                  {effectiveSlots.map(slot => {
                     const isSelected = selectedSlot === slot.time;
                     return (
                       <button
