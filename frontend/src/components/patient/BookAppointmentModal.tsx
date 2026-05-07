@@ -96,9 +96,12 @@ const BookAppointmentModal: React.FC<Props> = ({ doctor, onClose, onSuccess }) =
     if (!selectedSlot) { toast.error('Selecciona un horario'); return; }
     setLoading(true);
     try {
+      const localDate = new Date(selectedSlot);
+      const appointmentDateISO = localDate.toISOString();
+
       await appointmentApi.create({
         doctorId: doctor._id,
-        appointmentDate: selectedSlot,
+        appointmentDate: appointmentDateISO,
         type,
         reason: reason.trim() || undefined,
       });
