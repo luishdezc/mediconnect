@@ -49,8 +49,17 @@ const VideoPage: React.FC = () => {
   const [callError, setCallError]         = useState<string | null>(null);
 
   useEffect(() => {
-    appointmentApi.getMy({ status: 'confirmed' })
-      .then(r => setAppointments(r.data.data.filter((a: Appointment) => a.type === 'video')))
+    // Pull every upcoming-ish appointment and filter to video calls.
+    // We deliberately don't pass a `status` filter — newly booked
+    // appointments are `pending` and the doctor hasn't confirmed them yet,
+    // but the patient still wants to see them listed here.
+    appointmentApi.getMy()
+      .then(r => setAppointments(
+        r.data.data.filter((a: Appointment) =>
+          a.type === 'video' &&
+          ['pending', 'confirmed', 'in_progress'].includes(a.status)
+        )
+      ))
       .catch(() => {});
   }, []);
 
@@ -507,12 +516,12 @@ const VideoPage: React.FC = () => {
 
             <Card>
               <div className={styles.apptListHeader}>
-                <h3><Users size={16} /> Citas de videollamada confirmadas</h3>
+                <h3><Users size={16} /> Citas de videollamada</h3>
               </div>
               {appointments.length === 0 ? (
                 <div className={styles.noAppts}>
                   <Video size={40} strokeWidth={1.2} />
-                  <p>No tienes citas de videollamada confirmadas próximamente.</p>
+                  <p>No tienes citas de videollamada próximamente.</p>
                 </div>
               ) : (
                 <div className={styles.apptList}>

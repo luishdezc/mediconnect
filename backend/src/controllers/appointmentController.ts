@@ -5,6 +5,7 @@ import Patient from '../models/Patient';
 import Availability from '../models/Availability';
 import { IUser } from '../models/User';
 import { sendAppointmentConfirmation, sendAppointmentReminder } from '../services/emailService';
+import { mxLocalToUtc, mxDayOfWeek } from '../services/timeZone';
 import { getIO } from '../sockets/socketManager';
 
 const PAGE_SIZE = 10;
@@ -247,9 +248,10 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<vo
     const { doctorId, date } = req.query;
     if (!doctorId || !date) { res.status(400).json({ message: 'doctorId y date requeridos' }); return; }
 
-    // Parse date string as local noon to get correct day-of-week regardless of server timezone
-    const targetDate = new Date(`${date}T12:00:00`);
-    const dayOfWeek = targetDate.getDay();
+    const dateStr = String(date);
+
+    // Day-of-week is computed in MX timezone — independent of the host process TZ.
+    const dayOfWeek = mxDayOfWeek(dateStr);
 
     const availabilities = await Availability.find({ doctorId: String(doctorId), dayOfWeek, isActive: true });
 
@@ -258,17 +260,20 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<vo
       return;
     }
 
-    // Current time in Mexico City for past-slot filtering
-    const nowMX = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
+    // For past-slot detection: a slot's actual UTC instant vs. real now.
+    const nowUtcMs = Date.now();
 
-    // Pre-fetch all booked appointments for this doctor on this day in one query
-    // (avoids N+1 queries inside the loop).
-    const dayStart = new Date(`${date}T00:00:00`);
-    const dayEnd = new Date(`${date}T23:59:59.999`);
+    // Pre-fetch all booked appointments for this doctor that *could* overlap
+    // this MX day. The MX day spans roughly 06:00–06:00 UTC of two adjacent
+    // UTC days, so we widen the window by a day on each side and rely on
+    // the overlap check below to filter.
+    const dayStartUtc = mxLocalToUtc(dateStr, 0, 0);
+    const dayEndUtc   = new Date(dayStartUtc.getTime() + 24 * 60 * 60 * 1000);
+
     const dayAppointments = await Appointment.find({
       doctorId: String(doctorId),
       status: { $in: ['pending', 'confirmed', 'in_progress'] },
-      appointmentDate: { $gte: dayStart, $lte: dayEnd },
+      appointmentDate: { $gte: dayStartUtc, $lt: dayEndUtc },
     }).select('appointmentDate appointmentEndDate').lean();
 
     type Reason = 'available' | 'taken' | 'past';
@@ -286,29 +291,25 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<vo
         const mm = m % 60;
 
         const pad = (n: number) => String(n).padStart(2, '0');
-        const localTimeStr = `${date}T${pad(hh)}:${pad(mm)}:00`;
+        // The wall-clock string we expose to the frontend — frontend renders
+        // it as-is without doing TZ conversion (see notes in BookAppointmentModal).
+        const localTimeStr = `${dateStr}T${pad(hh)}:${pad(mm)}:00`;
 
-        // Past-slot check: compare with Mexico City current time + 5 min buffer
-        const slotMX = new Date(`${date}T${pad(hh)}:${pad(mm)}:00`);
-        const isPast = slotMX.getTime() < nowMX.getTime() + 5 * 60 * 1000;
+        // Convert the MX wall-clock slot to a real UTC instant.
+        const slotStartUtc = mxLocalToUtc(dateStr, hh, mm);
+        const slotEndUtc   = new Date(slotStartUtc.getTime() + availability.slotDuration * 60000);
 
-        if (isPast) {
+        // Past-slot check: real UTC comparison + 5 min buffer.
+        if (slotStartUtc.getTime() < nowUtcMs + 5 * 60 * 1000) {
           slots.push({ time: localTimeStr, available: false, reason: 'past' });
           continue;
         }
 
-        // Conflict check against the day's appointments.
-        // We compare timestamps directly — both the stored appointmentDate and
-        // the slot we'd create from the frontend resolve to the same UTC instant
-        // assuming both client and server share the same notion of "local time"
-        // for the date string (Mexico City in our case).
-        const slotStart = new Date(localTimeStr);
-        const slotEnd = new Date(slotStart.getTime() + availability.slotDuration * 60000);
-
+        // Conflict check against the day's appointments — pure UTC overlap.
         const busy = dayAppointments.some(appt => {
           const apptStart = new Date(appt.appointmentDate).getTime();
           const apptEnd = new Date(appt.appointmentEndDate).getTime();
-          return apptStart < slotEnd.getTime() && apptEnd > slotStart.getTime();
+          return apptStart < slotEndUtc.getTime() && apptEnd > slotStartUtc.getTime();
         });
 
         slots.push({
@@ -323,7 +324,7 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<vo
     slots.forEach(s => unique.set(s.time, s));
 
     const sorted = Array.from(unique.values()).sort(
-      (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime()
+      (a, b) => a.time.localeCompare(b.time)
     );
 
     res.json({ data: sorted });
