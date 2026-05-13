@@ -114,18 +114,47 @@
   @media (max-width: 400px) { grid-template-columns: repeat(2, 1fr); }
 }
 .slot {
-  padding: sp(2) 0; border: 1.5px solid $primary-200; border-radius: $radius-md;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  padding: sp(2) 0; min-height: 48px;
+  border: 1.5px solid $primary-200; border-radius: $radius-md;
   background: $primary-50; color: $primary-700; font-size: 13px; font-weight: 600;
   cursor: pointer; transition: all $transition-fast; text-align: center; position: relative;
   &:hover:not(:disabled) { background: $primary-100; border-color: $primary-500; transform: translateY(-1px); }
   &--selected  { background: $primary-700; color: $white; border-color: $primary-700; }
-  &--taken     { background: $gray-100; color: $gray-400; cursor: not-allowed; border-color: $gray-200;
-    text-decoration: line-through; font-weight: 400; }
+  &--taken     {
+    background: #fef2f2;
+    color: #b91c1c;
+    border-color: #fecaca;
+    cursor: not-allowed;
+    text-decoration: line-through;
+    font-weight: 500;
+    .slotBadge { color: #b91c1c; }
+  }
+  &--past {
+    background: $gray-100;
+    color: $gray-400;
+    border-color: $gray-200;
+    cursor: not-allowed;
+    font-weight: 400;
+    opacity: 0.7;
+    .slotBadge { color: $gray-500; }
+  }
   &:disabled   { cursor: not-allowed; }
 }
-.slotTakenDot {
-  position: absolute; top: 4px; right: 4px; width: 5px; height: 5px;
-  border-radius: 50%; background: $error-500; display: block;
+.slotTime { display: block; line-height: 1.1; }
+.slotBadge {
+  display: inline-flex; align-items: center; gap: 2px;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1;
+  // strike-through is inherited from .slot--taken; cancel it for the badge
+  text-decoration: none !important;
+}
+
+.allBookedMsg {
+  padding: sp(3); background: #fef2f2; border: 1px solid #fecaca;
+  border-radius: $radius-md; color: #b91c1c; font-size: 13px; font-weight: 500;
+  text-align: center;
 }
 
 .textarea {

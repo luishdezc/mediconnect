@@ -87,6 +87,13 @@ export const createAppointment = async (req: Request, res: Response): Promise<vo
       patient: { name: user.name, email: user.email },
     });
 
+    // Notify anyone currently viewing this doctor's available slots
+    // so the slot grid refreshes and the just-booked slot shows as taken.
+    io.to(`doctor-slots:${doctorId}`).emit('slots:invalidate', {
+      doctorId: String(doctorId),
+      appointmentDate: start.toISOString(),
+    });
+
     // Email is non-critical — don't let it fail the whole request
     try {
       await sendAppointmentConfirmation(user.email, user.name, {
@@ -219,6 +226,16 @@ export const updateAppointmentStatus = async (req: Request, res: Response): Prom
     const io = getIO();
     io.to(`appointment:${id}`).emit('appointment:statusUpdate', { id, status });
 
+    // When an appointment is cancelled or completed, the slot is potentially
+    // freed (cancelled) or simply no longer blocking new bookings — notify
+    // anyone viewing that doctor's slot grid so it refreshes.
+    if (['cancelled', 'completed', 'no_show'].includes(status)) {
+      io.to(`doctor-slots:${appointment.doctorId.toString()}`).emit('slots:invalidate', {
+        doctorId: appointment.doctorId.toString(),
+        appointmentDate: appointment.appointmentDate.toISOString(),
+      });
+    }
+
     res.json({ message: 'Estado actualizado', appointment });
   } catch (error) {
     res.status(500).json({ message: 'Error al actualizar cita' });
@@ -244,7 +261,18 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<vo
     // Current time in Mexico City for past-slot filtering
     const nowMX = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Mexico_City' }));
 
-    const slots: { time: string; available: boolean }[] = [];
+    // Pre-fetch all booked appointments for this doctor on this day in one query
+    // (avoids N+1 queries inside the loop).
+    const dayStart = new Date(`${date}T00:00:00`);
+    const dayEnd = new Date(`${date}T23:59:59.999`);
+    const dayAppointments = await Appointment.find({
+      doctorId: String(doctorId),
+      status: { $in: ['pending', 'confirmed', 'in_progress'] },
+      appointmentDate: { $gte: dayStart, $lte: dayEnd },
+    }).select('appointmentDate appointmentEndDate').lean();
+
+    type Reason = 'available' | 'taken' | 'past';
+    const slots: { time: string; available: boolean; reason: Reason }[] = [];
 
     for (const availability of availabilities) {
       const [startH, startM] = availability.startTime.split(':').map(Number);
@@ -257,37 +285,41 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<vo
         const hh = Math.floor(m / 60);
         const mm = m % 60;
 
-        // Build time string as "yyyy-MM-ddTHH:mm:00" — no timezone suffix
-        // The frontend will parse this as LOCAL time, showing exactly what the doctor configured
         const pad = (n: number) => String(n).padStart(2, '0');
         const localTimeStr = `${date}T${pad(hh)}:${pad(mm)}:00`;
 
-        // For past-slot check: compare with Mexico City current time
+        // Past-slot check: compare with Mexico City current time + 5 min buffer
         const slotMX = new Date(`${date}T${pad(hh)}:${pad(mm)}:00`);
         const isPast = slotMX.getTime() < nowMX.getTime() + 5 * 60 * 1000;
 
         if (isPast) {
-          slots.push({ time: localTimeStr, available: false });
+          slots.push({ time: localTimeStr, available: false, reason: 'past' });
           continue;
         }
 
-        // For DB conflict check we need real UTC instants
-        // Slots are stored in UTC in the DB, so convert Mexico City time to UTC
-        const slotUTC = new Date(new Date(localTimeStr).toLocaleString('en-US', { timeZone: 'UTC' }));
-        const slotEndUTC = new Date(slotUTC.getTime() + availability.slotDuration * 60000);
+        // Conflict check against the day's appointments.
+        // We compare timestamps directly — both the stored appointmentDate and
+        // the slot we'd create from the frontend resolve to the same UTC instant
+        // assuming both client and server share the same notion of "local time"
+        // for the date string (Mexico City in our case).
+        const slotStart = new Date(localTimeStr);
+        const slotEnd = new Date(slotStart.getTime() + availability.slotDuration * 60000);
 
-        const busy = await Appointment.findOne({
-          doctorId: String(doctorId),
-          status: { $in: ['pending', 'confirmed', 'in_progress'] },
-          appointmentDate: { $lt: slotEndUTC },
-          appointmentEndDate: { $gt: slotUTC },
+        const busy = dayAppointments.some(appt => {
+          const apptStart = new Date(appt.appointmentDate).getTime();
+          const apptEnd = new Date(appt.appointmentEndDate).getTime();
+          return apptStart < slotEnd.getTime() && apptEnd > slotStart.getTime();
         });
 
-        slots.push({ time: localTimeStr, available: !busy });
+        slots.push({
+          time: localTimeStr,
+          available: !busy,
+          reason: busy ? 'taken' : 'available',
+        });
       }
     }
 
-    const unique = new Map();
+    const unique = new Map<string, typeof slots[number]>();
     slots.forEach(s => unique.set(s.time, s));
 
     const sorted = Array.from(unique.values()).sort(
@@ -297,6 +329,7 @@ export const getAvailableSlots = async (req: Request, res: Response): Promise<vo
     res.json({ data: sorted });
 
   } catch (error) {
+    console.error('getAvailableSlots error:', error);
     res.status(500).json({ message: 'Error al obtener slots' });
   }
 };
