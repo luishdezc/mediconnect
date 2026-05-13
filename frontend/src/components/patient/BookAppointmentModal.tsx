@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { resolveAvatar } from '../../utils/avatar';
 import { format, getDay, parseISO, isToday, isPast } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Calendar, Clock, Video, Building2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, Clock, Video, Building2, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Modal } from '../ui/Card';
 import Button from '../ui/Button';
 import { appointmentApi, doctorApi } from '../../api';
+import { socketService } from '../../services/socketService';
 import type { Doctor, TimeSlot, Availability } from '../../types';
 import styles from './BookAppointmentModal.module.scss';
 
@@ -32,6 +33,21 @@ const BookAppointmentModal: React.FC<Props> = ({ doctor, onClose, onSuccess }) =
   const [loading, setLoading]             = useState(false);
   const [loadingSlots, setLoadingSlots]   = useState(false);
   const [loadingAvail, setLoadingAvail]   = useState(true);
+  // Ticks every 30s so slots whose time has passed get marked as taken
+  // without a server round-trip.
+  const [now, setNow]                     = useState<Date>(new Date());
+
+  // Keep the latest selected slot in a ref so the socket handler can read it
+  // without re-subscribing on every state change.
+  const selectedSlotRef = useRef(selectedSlot);
+  useEffect(() => { selectedSlotRef.current = selectedSlot; }, [selectedSlot]);
+
+  // When WE just successfully booked, the backend also broadcasts a
+  // slots:invalidate that we receive back. Without this guard, our own
+  // booking would trigger the "your slot got taken" toast simultaneously
+  // with the success toast. We track our own bookings here and skip the
+  // matching invalidation.
+  const ownBookingsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     doctorApi.getById(doctor._id)
@@ -42,17 +58,74 @@ const BookAppointmentModal: React.FC<Props> = ({ doctor, onClose, onSuccess }) =
 
   const activeDays = new Set(availability.filter(a => a.isActive).map(a => a.dayOfWeek));
 
-  useEffect(() => {
+  // Re-fetch slots — extracted so we can call it both on date-change and
+  // on socket invalidations.
+  const fetchSlots = (silent = false) => {
     if (!selectedDate) return;
-    setLoadingSlots(true);
-    setSelectedSlot('');
-    setSlots([]);
+    if (!silent) setLoadingSlots(true);
     const dateStr = format(selectedDate, 'yyyy-MM-dd');
     appointmentApi.getSlots(doctor._id, dateStr)
-      .then(r => setSlots(r.data.data))
-      .catch(() => setSlots([]))
-      .finally(() => setLoadingSlots(false));
+      .then(r => {
+        const fresh: TimeSlot[] = r.data.data;
+        setSlots(fresh);
+        // If the user had a slot selected and it's no longer available,
+        // clear the selection and let them know.
+        const stillSelected = selectedSlotRef.current;
+        if (stillSelected) {
+          const match = fresh.find(s => s.time === stillSelected);
+          if (match && !match.available) {
+            setSelectedSlot('');
+            toast.error('El horario que habías elegido ya fue ocupado. Elige otro.');
+          }
+        }
+      })
+      .catch(() => { if (!silent) setSlots([]); })
+      .finally(() => { if (!silent) setLoadingSlots(false); });
+  };
+
+  useEffect(() => {
+    if (!selectedDate) return;
+    setSelectedSlot('');
+    setSlots([]);
+    fetchSlots(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate, doctor._id]);
+
+  // Tick the clock every 30s so past-time slots gray out live, without
+  // hitting the server.
+  useEffect(() => {
+    const id = window.setInterval(() => setNow(new Date()), 30_000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  // Subscribe to slot invalidations for this doctor. When anyone books or
+  // cancels an appointment with this doctor, the backend emits
+  // `slots:invalidate` and we silently refetch.
+  useEffect(() => {
+    socketService.emit('join:doctor-slots', doctor._id);
+
+    const handleInvalidate = (data: { doctorId: string; appointmentDate?: string }) => {
+      if (data?.doctorId !== doctor._id) return;
+      if (!selectedDate) return;
+
+      // Skip echoes of our own bookings — the success path already handles
+      // the UI update via onSuccess().
+      if (data.appointmentDate && ownBookingsRef.current.has(data.appointmentDate)) {
+        ownBookingsRef.current.delete(data.appointmentDate);
+        return;
+      }
+
+      fetchSlots(true);
+    };
+
+    socketService.on('slots:invalidate', handleInvalidate);
+
+    return () => {
+      socketService.off('slots:invalidate', handleInvalidate);
+      socketService.emit('leave:doctor-slots', doctor._id);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [doctor._id, selectedDate]);
 
   const prevMonth = () => setCalendarDate(d => new Date(d.getFullYear(), d.getMonth() - 1, 1));
   const nextMonth = () => setCalendarDate(d => new Date(d.getFullYear(), d.getMonth() + 1, 1));
@@ -79,25 +152,52 @@ const BookAppointmentModal: React.FC<Props> = ({ doctor, onClose, onSuccess }) =
   const isSelectedDay = (d: Date) =>
     selectedDate && format(d, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
 
-  const now = new Date();
-  const effectiveSlots = slots.map(s => {
-    if (s.available && selectedDate && isToday(selectedDate)) {
-      const slotTime = new Date(s.time);
-      if (slotTime.getTime() < now.getTime() + 5 * 60 * 1000) {
-        return { ...s, available: false };
-      }
+  type EffectiveSlot = TimeSlot & { effectiveReason: 'available' | 'taken' | 'past' };
+
+  const effectiveSlots: EffectiveSlot[] = slots.map(s => {
+    const slotTime = new Date(s.time).getTime();
+    const isInPast = slotTime < now.getTime() + 5 * 60 * 1000;
+
+    // Past always wins — even if backend hadn't realized yet.
+    if (isInPast) {
+      return { ...s, available: false, effectiveReason: 'past' };
     }
-    return s;
+
+    if (!s.available) {
+      // Backend may not send `reason` on older builds; default to 'taken'
+      // for any non-past unavailable slot.
+      const reason = s.reason === 'past' ? 'past' : 'taken';
+      return { ...s, available: false, effectiveReason: reason };
+    }
+
+    return { ...s, available: true, effectiveReason: 'available' };
   });
+
   const availableSlots = effectiveSlots.filter(s => s.available);
-  const takenSlots     = effectiveSlots.filter(s => !s.available);
+  const takenSlots     = effectiveSlots.filter(s => s.effectiveReason === 'taken');
+  const pastSlots      = effectiveSlots.filter(s => s.effectiveReason === 'past');
 
   const handleBook = async () => {
     if (!selectedSlot) { toast.error('Selecciona un horario'); return; }
+
+    // Last-second client-side guard: the slot might have ticked into the past
+    // since the user picked it.
+    const localDate = new Date(selectedSlot);
+    if (localDate.getTime() < Date.now() + 5 * 60 * 1000) {
+      toast.error('Esa hora ya pasó. Elige otra.');
+      setSelectedSlot('');
+      fetchSlots(true);
+      return;
+    }
+
     setLoading(true);
     try {
-      const localDate = new Date(selectedSlot);
       const appointmentDateISO = localDate.toISOString();
+
+      // Tell the socket handler to ignore the invalidate event that will come
+      // back as an echo of our own booking. Otherwise we'd show the success
+      // toast AND the "your slot was taken" toast at the same time.
+      ownBookingsRef.current.add(appointmentDateISO);
 
       await appointmentApi.create({
         doctorId: doctor._id,
@@ -108,7 +208,19 @@ const BookAppointmentModal: React.FC<Props> = ({ doctor, onClose, onSuccess }) =
       toast.success('¡Cita agendada! Recibirás un correo de confirmación.');
       onSuccess();
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Error al agendar cita');
+      // The booking failed — clear the guard so future invalidations are
+      // handled normally.
+      ownBookingsRef.current.delete(localDate.toISOString());
+
+      // 409 = the slot was taken between us showing it as free and the
+      // user clicking Confirmar. Refresh so the UI catches up.
+      if (err.response?.status === 409) {
+        toast.error('Ese horario fue tomado mientras lo seleccionabas. Elige otro.');
+        setSelectedSlot('');
+        fetchSlots(true);
+      } else {
+        toast.error(err.response?.data?.message || 'Error al agendar cita');
+      }
     } finally {
       setLoading(false);
     }
@@ -236,11 +348,26 @@ const BookAppointmentModal: React.FC<Props> = ({ doctor, onClose, onSuccess }) =
               <>
                 <div className={styles.slotsPanelHeader}>
                   <strong>{format(selectedDate, "EEEE d 'de' MMMM", { locale: es })}</strong>
-                  <span>{availableSlots.length} disponibles · {takenSlots.length} ocupados</span>
+                  <span>
+                    {availableSlots.length} disponibles
+                    {takenSlots.length > 0 && <> · {takenSlots.length} ocupados</>}
+                    {pastSlots.length > 0 && <> · {pastSlots.length} ya pasaron</>}
+                  </span>
                 </div>
+                {availableSlots.length === 0 && (
+                  <div className={styles.allBookedMsg}>
+                    No quedan horarios disponibles para este día.
+                  </div>
+                )}
                 <div className={styles.slotsGrid}>
                   {effectiveSlots.map(slot => {
                     const isSelected = selectedSlot === slot.time;
+                    const reasonClass =
+                      slot.effectiveReason === 'taken' ? styles['slot--taken'] :
+                      slot.effectiveReason === 'past'  ? styles['slot--past']  : '';
+                    const title =
+                      slot.effectiveReason === 'taken' ? 'Este horario ya fue reservado' :
+                      slot.effectiveReason === 'past'  ? 'Esta hora ya pasó' : '';
                     return (
                       <button
                         key={slot.time}
@@ -248,14 +375,23 @@ const BookAppointmentModal: React.FC<Props> = ({ doctor, onClose, onSuccess }) =
                         disabled={!slot.available}
                         className={[
                           styles.slot,
-                          !slot.available ? styles['slot--taken']    : '',
-                          isSelected      ? styles['slot--selected'] : '',
+                          reasonClass,
+                          isSelected ? styles['slot--selected'] : '',
                         ].filter(Boolean).join(' ')}
                         onClick={() => slot.available && setSelectedSlot(slot.time)}
-                        title={!slot.available ? 'Horario ocupado' : ''}
+                        title={title}
                       >
-                        {format(parseISO(slot.time), 'HH:mm')}
-                        {!slot.available && <span className={styles.slotTakenDot}/>}
+                        <span className={styles.slotTime}>
+                          {format(parseISO(slot.time), 'HH:mm')}
+                        </span>
+                        {slot.effectiveReason === 'taken' && (
+                          <span className={styles.slotBadge}>
+                            <X size={10} /> Ocupado
+                          </span>
+                        )}
+                        {slot.effectiveReason === 'past' && (
+                          <span className={styles.slotBadge}>Pasó</span>
+                        )}
                       </button>
                     );
                   })}

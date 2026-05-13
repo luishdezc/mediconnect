@@ -102,6 +102,8 @@ export interface Availability {
 export interface TimeSlot {
   time: string;
   available: boolean;
+  /** Reason a slot is unavailable. Older backends may omit this. */
+  reason?: 'available' | 'taken' | 'past';
 }
 
 export interface Message {

@@ -39,6 +39,17 @@ export const initSocket = (server: HTTPServer): SocketIOServer => {
       socket.join(`conversation:${conversationId}`);
     });
 
+    // Join a doctor's slots room — used by the booking modal to receive
+    // real-time updates whenever an appointment is created/cancelled for
+    // this doctor, so the slot grid can refresh.
+    socket.on('join:doctor-slots', (doctorId: string) => {
+      socket.join(`doctor-slots:${doctorId}`);
+    });
+
+    socket.on('leave:doctor-slots', (doctorId: string) => {
+      socket.leave(`doctor-slots:${doctorId}`);
+    });
+
     // Handle chat message
     socket.on('chat:send', async (data: {
       conversationId: string;
